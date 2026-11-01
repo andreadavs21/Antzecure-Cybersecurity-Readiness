@@ -1,0 +1,395 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberReady | NIST Incident Response Readiness</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+    <h1>CyberReady</h1>
+    <p>Incident Response Planning & Training Tool</p>
+</header>
+
+<main>
+
+    <h2>Cybersecurity Readiness Questionnaire</h2>
+
+    <p>
+
+    </p>
+
+    <p>
+        Answer the following questions to receive preliminary
+        cybersecurity recommendations based on your organization's
+        current practices.
+    </p>
+
+    <form id="organizationForm">
+
+        <!-- ====================================== -->
+        <!-- SECTION 1: GOVERN -->
+        <!-- ====================================== -->
+
+        <h2>Section 1: Govern (GV)</h2>
+
+        <p>
+            This section helps identify who manages cybersecurity 
+            and makes important security decisions within your organization.
+        </p>
+
+        <label for="organizationName">
+            1. What is the name of your organization?
+        </label>
+        <input
+            type="text"
+            id="organizationName"
+            placeholder="Organization name"
+            required
+        >
+
+        <label for="employeeCount">
+            2. How many employees work at your organization?
+        </label>
+        <select id="employeeCount" required>
+            <option value="">Select an option</option>
+            <option value="1-10">1–10 employees</option>
+            <option value="11-25">11–25 employees</option>
+            <option value="26-50">26–50 employees</option>
+            <option value="51+">51+ employees</option>
+        </select>
+
+        <label for="itSupport">
+            3. Who is responsible for managing your
+            organization's IT systems and cybersecurity?
+        </label>
+        <select id="itSupport" required>
+            <option value="">Select an option</option>
+            <option value="Internal IT Team">
+                Internal IT Team
+            </option>
+            <option value="External IT Provider">
+                External IT Provider
+            </option>
+            <option value="Office Manager">
+                Office Manager
+            </option>
+            <option value="No IT Support">
+                No Dedicated IT Support
+            </option>
+        </select>
+
+        <!-- ====================================== -->
+        <!-- SECTION 2: IDENTIFY -->
+        <!-- ====================================== -->
+
+        <h2>Section 2: Identify (ID)</h2>
+
+        <p>
+            This section helps determine which systems and information
+            are most important to your organization's daily operations.
+        </p>
+
+        <label for="criticalSystems">
+            4. Which system is most critical
+            to your daily operations?
+        </label>
+        <select id="criticalSystems" required>
+            <option value="">Select an option</option>
+            <option value="Email">Email</option>
+            <option value="Financial Systems">
+                Financial Systems
+            </option>
+            <option value="Customer Records">
+                Customer Records
+            </option>
+            <option value="Shared Files">
+                Shared Files
+            </option>
+            <option value="Website">Website</option>
+            <option value="Other">Other</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="sensitiveData">
+            5. Does your organization handle sensitive
+            customer, employee, or financial information?
+        </label>
+        <select id="sensitiveData" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <!-- ====================================== -->
+        <!-- SECTION 3: PROTECT -->
+        <!-- ====================================== -->
+
+        <h2>Section 3: Protect (PR)</h2>
+
+        <p>
+            This section evaluates the basic security measures your 
+            organization uses to protect accounts, employees, and data.
+        </p>
+
+        <label for="mfa">
+            6. Does your organization use multi-factor
+            authentication (MFA) for important accounts?
+        </label>
+        <select id="mfa" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="Some Accounts">
+                Only Some Accounts
+            </option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="employeeTraining">
+            7. Does your organization provide cybersecurity
+            awareness or incident response training?
+        </label>
+        <select id="employeeTraining" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="backups">
+            8. Does your organization maintain protected
+            backups of critical data?
+        </label>
+        <select id="backups" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <!-- ====================================== -->
+        <!-- SECTION 4: DETECT -->
+        <!-- ====================================== -->
+
+        <h2>Section 4: Detect (DE)</h2>
+
+        <p>
+            This section helps determine whether your organization 
+            can recognize suspicious activity before it causes more damage.
+        </p>
+
+        <label for="employeeAwareness">
+            9. Do employees know how to recognize
+            and report suspicious cybersecurity activity?
+        </label>
+        <select id="employeeAwareness" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="Some Employees">
+                Some Employees
+            </option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="securityMonitoring">
+            10. Does your organization use security tools
+            or services to detect suspicious activity?
+        </label>
+        <select id="securityMonitoring" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="Partially">Partially</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <!-- ====================================== -->
+        <!-- SECTION 5: RESPOND -->
+        <!-- ====================================== -->
+
+        <h2>Section 5: Respond (RS)</h2>
+
+        <p>
+            This section identifies whether your organization knows whom to contact 
+            and what actions to take when a cybersecurity incident occurs
+        </p>
+
+        <label for="existingPlan">
+            11. Does your organization have a written
+            cybersecurity incident response plan?
+        </label>
+        <select id="existingPlan" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="Partially">Partially / In Progress</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="emergencyContact">
+            12. Who should employees contact first
+            during a cybersecurity incident?
+        </label>
+        <input
+            type="text"
+            id="emergencyContact"
+            placeholder="Example: IT Manager or Not Assigned"
+            required
+        >
+
+        <label for="alternateContact">
+            13. Does your organization have an
+            alternate emergency contact?
+        </label>
+        <select id="alternateContact" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="reportingMethod">
+            14. How should employees report
+            a suspected cybersecurity incident?
+        </label>
+        <select id="reportingMethod" required>
+            <option value="">Select an option</option>
+            <option value="Phone">Phone</option>
+            <option value="Email">Email</option>
+            <option value="In Person">In Person</option>
+            <option value="Other">Other</option>
+            <option value="Not Established">
+                Not Established
+            </option>
+        </select>
+
+        <label for="deviceIsolation">
+            15. Does your organization have an approved
+            procedure for isolating compromised devices?
+        </label>
+        <select id="deviceIsolation" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="incidentSeverity">
+            16. Does your organization have a process
+            for assessing the severity of cyber incidents?
+        </label>
+        <select id="incidentSeverity" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="Partially">Partially</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="responseExercises">
+            17. Has your organization practiced responding
+            to cybersecurity incidents through exercises
+            or simulations?
+        </label>
+        <select id="responseExercises" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <!-- ====================================== -->
+        <!-- SECTION 6: RECOVER -->
+        <!-- ====================================== -->
+
+        <h2>Section 6: Recover (RC)</h2>
+
+        <p>
+            This section evaluates whether your organization can restore important systems 
+            and continue operations after a cybersecurity incident.
+        </p>
+
+        <label for="backupTesting">
+            18. Have your backups been tested to confirm
+            that critical data can be restored?
+        </label>
+        <select id="backupTesting" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+            <option value="Not Applicable">Not Applicable</option>
+        </select>
+
+        <label for="recoveryProcedures">
+            19. Does your organization have documented
+            procedures for restoring critical systems
+            after a cybersecurity incident?
+        </label>
+        <select id="recoveryProcedures" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="Partially">Partially</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+        <label for="recoveryCommunication">
+            20. Does your organization have a process
+            for communicating recovery progress
+            to employees or affected stakeholders?
+        </label>
+        <select id="recoveryCommunication" required>
+            <option value="">Select an option</option>
+            <option value="Yes">Yes</option>
+            <option value="Partially">Partially</option>
+            <option value="No">No</option>
+            <option value="Not Sure">Not Sure</option>
+        </select>
+
+
+
+
+
+        <button type="submit">
+            Generate Readiness Recommendations
+        </button>
+
+    </form>
+
+    <!-- RESULTS -->
+
+    <section id="results" hidden>
+
+        <h2>Organization Profile</h2>
+        <div id="profileOutput"></div>
+
+        <h2>Cybersecurity Recommendations</h2>
+        <p>
+            Personalized cybersecurity recommendations
+            based on your organization's answers.
+        </p>
+        <div id="recommendationsOutput"></div>
+
+        <p class="disclaimer">
+    These recommendations are based on information
+    provided by your organization. They are intended
+    as general cybersecurity guidance and do not
+    replace a professional security assessment.
+        </p>
+
+    </section>
+
+</main>
+
+<script src="script.js"></script>
+
+</body>
+</html>

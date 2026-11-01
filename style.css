@@ -1,0 +1,181 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    color: #1f2937;
+}
+
+header {
+    background-color: #0b2345;
+    color: white;
+    text-align: center;
+    padding: 30px;
+}
+
+header h1 {
+    margin-bottom: 10px;
+}
+
+main {
+    max-width: 700px;
+    margin: 40px auto;
+    background-color: white;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+label {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+input, select {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+}
+
+button {
+    background-color: #f97316;
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+button:hover {
+    background-color: #ea580c;
+}
+
+#results {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #eff6ff;
+    border-radius: 8px;
+}
+
+#results[hidden] {
+    display: none;
+}
+
+
+#recommendationsOutput {
+    background-color: #fff7ed;
+    border-left: 5px solid #f97316;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+#recommendationsOutput ul {
+    padding-left: 20px;
+}
+
+#recommendationsOutput li {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+
+#ransomwarePlanOutput {
+    margin-top: 20px;
+    background-color: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 25px;
+}
+
+.plan-step {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: white;
+    border-left: 4px solid #0b2345;
+    border-radius: 6px;
+}
+
+.plan-step h3 {
+    margin-top: 0;
+    color: #0b2345;
+}
+
+.plan-step p {
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+
+
+/* Recommendation container */
+#recommendationsOutput {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* Individual recommendation cards */
+.recommendation-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 15px;
+    border-left: 5px solid #94a3b8;
+}
+
+.recommendation-card h3 {
+    margin-top: 0;
+    font-size: 17px;
+}
+
+.recommendation-card p {
+    margin-bottom: 0;
+    line-height: 1.6;
+}
+
+/* Priority indicators */
+.recommendation-card.high {
+    border-left-color: #dc2626;
+}
+
+.recommendation-card.high h3 {
+    color: #b91c1c;
+}
+
+.recommendation-card.medium {
+    border-left-color: #f97316;
+}
+
+.recommendation-card.medium h3 {
+    color: #c2410c;
+}
+
+.recommendation-card.low {
+    border-left-color: #16a34a;
+}
+
+.recommendation-card.low h3 {
+    color: #15803d;
+}
+
+
+.nist-reference {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+
