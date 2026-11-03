@@ -841,40 +841,28 @@ form.addEventListener("submit", function(event) {
 
 
     // ==========================================
-    // DISPLAY RECOMMENDATION CARDS
+    // DISPLAY RECOMMENDATION SUMMARY AND RETAIN THIS SUBMITTED ASSESSMENT
     // ==========================================
 
-    const recommendationsOutput =
-        document.getElementById("recommendationsOutput");
-
-    recommendationsOutput.replaceChildren();
-
-    recommendations.forEach(function(rec) {
+    latestAssessmentReport = {
+        organizationName: organizationData.organizationName,
+        generatedAt: new Date(),
+        overview: fields.map(([label, value]) => [label, value]),
+        recommendations: recommendations.map(rec => ({ ...rec }))
+    };
+    document.getElementById("organizationProfile").open = false;
+    document.getElementById("reportStatus").textContent = "";
+    const summary = document.getElementById("recommendationsOutput");
+    summary.replaceChildren();
+    ["High", "Medium", "Low"].forEach(priority => {
         const card = document.createElement("div");
-        card.className = "recommendation-card";
-        card.classList.add(rec.priority.toLowerCase());
-
-        const heading = document.createElement("h3");
-        heading.textContent =
-            rec.priority.toUpperCase() +
-            " PRIORITY — " +
-            rec.category;
-
-        const paragraph = document.createElement("p");
-        paragraph.textContent = rec.message;
-
-        /*const nistReference = document.createElement("p");
-        nistReference.className = "nist-reference";
-        nistReference.textContent =
-            "NIST CSF 2.0: " + rec.nist;*/
-
-        card.append(
-            heading,
-            paragraph,
-            //nistReference
-        );
-
-        recommendationsOutput.appendChild(card);
+        card.className = "priority-summary-card " + priority.toLowerCase();
+        const count = document.createElement("strong");
+        count.textContent = recommendations.filter(rec => rec.priority === priority).length;
+        const label = document.createElement("span");
+        label.textContent = priority + " priority";
+        card.append(count, label);
+        summary.append(card);
     });
 
 
@@ -889,4 +877,104 @@ form.addEventListener("submit", function(event) {
         block: "start"
     });
 
+});
+
+// Reports use a snapshot of the last valid submission, never unsubmitted field edits.
+let latestAssessmentReport = null;
+
+document.getElementById("downloadReport").addEventListener("click", () => {
+    if (!latestAssessmentReport) return;
+    const reportWindow = window.open("", "_blank");
+    const status = document.getElementById("reportStatus");
+    if (!reportWindow) {
+        status.textContent = "The report window was blocked. Allow pop-ups for this site, then try again.";
+        return;
+    }
+    reportWindow.opener = null;
+    const snapshot = latestAssessmentReport;
+    const reportDocument = reportWindow.document;
+    reportDocument.title = "Antzecure — Cybersecurity Readiness Report";
+    reportDocument.documentElement.lang = "en";
+    const charset = reportDocument.createElement("meta");
+    charset.charset = "UTF-8";
+    const viewport = reportDocument.createElement("meta");
+    viewport.name = "viewport";
+    viewport.content = "width=device-width, initial-scale=1";
+    const stylesheet = reportDocument.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = new URL("style.css", document.baseURI).href;
+    const styleReady = new Promise(resolve => {
+        stylesheet.onload = () => resolve(true);
+        stylesheet.onerror = () => resolve(false);
+    });
+    reportDocument.head.append(charset, viewport, stylesheet);
+    reportDocument.body.className = "report-page";
+
+    // All assessment text is inserted as textContent, including organization names.
+    function element(tag, text, className) {
+        const node = reportDocument.createElement(tag);
+        if (text !== undefined) node.textContent = text;
+        if (className) node.className = className;
+        return node;
+    }
+    const toolbar = element("div", undefined, "report-toolbar");
+    const printHelp = element("p", "In the print dialog, choose Save as PDF. Disable browser headers and footers for a cleaner report.");
+    const printButton = element("button", "Print / Save as PDF");
+    printButton.type = "button";
+    printButton.disabled = true;
+    printButton.addEventListener("click", () => reportWindow.print());
+    toolbar.append(printHelp, printButton);
+    const report = element("main", undefined, "readiness-report");
+    const header = element("header", undefined, "report-header");
+    const logo = element("img");
+    logo.src = new URL("public/assets/antzecure-logo.png", document.baseURI).href;
+    logo.alt = "Antzecure";
+    logo.width = 65;
+    logo.height = 52;
+    const title = element("div");
+    title.append(element("p", "ANTZECURE", "report-brand"), element("h1", "Cybersecurity Readiness Report"));
+    header.append(logo, title);
+    const metadata = element("div", undefined, "report-metadata");
+    const date = new Intl.DateTimeFormat(undefined, { year: "numeric", month: "long", day: "numeric" }).format(snapshot.generatedAt);
+    metadata.append(element("h2", snapshot.organizationName), element("p", "Generated: " + date));
+    const overview = element("section", undefined, "report-overview");
+    overview.append(element("h2", "Organization overview"));
+    const overviewList = element("dl");
+    snapshot.overview.forEach(([label, value]) => {
+        const item = element("div");
+        item.append(element("dt", label), element("dd", value));
+        overviewList.append(item);
+    });
+    overview.append(overviewList);
+    const summary = element("section", undefined, "report-priority-summary");
+    summary.append(element("h2", "Recommendations by priority"));
+    const counts = element("div", undefined, "report-counts");
+    ["High", "Medium", "Low"].forEach(priority => {
+        const count = snapshot.recommendations.filter(rec => rec.priority === priority).length;
+        counts.append(element("p", priority + " priority: " + count));
+    });
+    summary.append(counts);
+    report.append(header, metadata, overview, summary);
+    ["High", "Medium", "Low"].forEach(priority => {
+        const group = element("section", undefined, "report-priority-group");
+        group.append(element("h2", priority + "-priority recommendations"));
+        const recommendations = snapshot.recommendations.filter(rec => rec.priority === priority);
+        if (!recommendations.length) group.append(element("p", "No " + priority.toLowerCase() + "-priority recommendations were generated for these answers."));
+        recommendations.forEach(rec => {
+            const card = element("article", undefined, "report-recommendation " + priority.toLowerCase());
+            card.append(element("p", rec.priority + " priority", "report-priority"), element("h3", rec.category), element("p", rec.message), element("p", "NIST CSF 2.0: " + rec.nist, "report-nist"));
+            group.append(card);
+        });
+        report.append(group);
+    });
+    report.append(element("p", "These recommendations are based on information provided by your organization. They are intended as general cybersecurity guidance and do not replace a professional security assessment.", "disclaimer"));
+    reportDocument.body.append(toolbar, report);
+    Promise.all([styleReady, logo.decode().then(() => true).catch(() => false)]).then(([stylesLoaded, logoLoaded]) => {
+        if (!stylesLoaded || !logoLoaded) {
+            printHelp.textContent = "Some report assets could not load. Reload the assessment page and reopen the report before printing.";
+            return;
+        }
+        printButton.disabled = false;
+    });
+    status.textContent = "Report opened in a new tab. Use Print / Save as PDF to download it.";
 });
