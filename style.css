@@ -103,3 +103,52 @@ footer p { margin: 0; }
     footer { gap: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Section-by-section assessment; homepage styles remain unchanged. */
+main { max-width: 1120px; }
+.assessment-layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 28px; align-items: start; }
+.assessment-layout:has(.assessment-sidebar[hidden]) { grid-template-columns: minmax(0, 820px); justify-content: center; }
+.assessment-sidebar { position: sticky; top: 24px; border: 1px solid var(--border); border-radius: 14px; background: white; overflow: hidden; }
+.assessment-progress { padding: 22px 20px; border-bottom: 1px solid var(--border); }
+.progress-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; }
+#progressPercent { color: var(--red); font-weight: 700; }
+#assessmentProgress { display: block; appearance: none; width: 100%; height: 7px; margin: 15px 0 10px; border: 0; border-radius: 10px; overflow: hidden; background: #e7eaee; }
+#assessmentProgress::-webkit-progress-bar { background: #e7eaee; }
+#assessmentProgress::-webkit-progress-value { background: var(--red); }
+#assessmentProgress::-moz-progress-bar { background: var(--red); }
+#progressText { margin: 0; font-size: 12px; color: var(--muted); }
+.section-navigation { display: flex; flex-direction: column; gap: 5px; padding: 14px 10px; }
+.section-link { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 12px 10px; border: 1px solid transparent; border-left: 3px solid transparent; border-radius: 6px; background: white; color: var(--navy); text-align: left; font-size: 14px; font-weight: 600; }
+.section-link:hover { background: #f7f8fa; }
+.section-link[aria-current="step"] { background: #fff2f3; border-left-color: var(--red); color: var(--red); }
+.section-order { color: var(--muted); font-size: 10px; font-weight: 400; }
+.section-counter { margin-left: auto; padding: 2px 6px; border-radius: 4px; background: #f0f2f5; color: var(--muted); font-size: 11px; font-weight: 400; }
+.is-complete .section-counter { background: var(--navy); color: white; }
+.assessment-help { margin: 0; padding: 0 20px 22px; color: var(--muted); font-size: 12px; }
+.assessment-fields { min-width: 0; }
+.section-position { margin: 0 0 18px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; }
+.assessment-fields .question-section { width: 100%; }
+.section-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+.section-actions button { font-size: 14px; padding: 13px 18px; }
+.secondary-button { background: white; color: var(--navy); border: 1px solid var(--gray); }
+.secondary-button:hover { background: #f4f5f7; }
+.section-actions button:disabled { opacity: 0.45; cursor: not-allowed; }
+#generateRecommendations { width: 100%; margin-top: 16px; }
+.assessment-fields legend:focus { outline: 2px solid var(--red); outline-offset: 4px; border-radius: 3px; }
+@media (max-width: 800px) {
+    .assessment-layout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .assessment-sidebar { position: static; }
+    .assessment-progress { padding: 18px; }
+    .section-navigation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 10px; gap: 6px; }
+    .section-link { flex-wrap: wrap; justify-content: center; gap: 5px; padding: 10px 5px; font-size: 12px; border-left-width: 1px; border-bottom: 3px solid transparent; }
+    .section-link[aria-current="step"] { border-left-color: transparent; border-bottom-color: var(--red); }
+    .section-counter { margin: 0; }
+    .section-order { display: none; }
+    .assessment-help { padding: 2px 18px 16px; font-size: 11px; }
+}
+@media (max-width: 480px) {
+    .section-navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .section-actions { gap: 10px; }
+    .section-actions button { padding: 12px 10px; font-size: 12px; }
+    #generateRecommendations { font-size: 14px; }
+}

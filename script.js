@@ -33,12 +33,79 @@ backupsSelect.addEventListener("change", updateBackupTesting);
 updateBackupTesting();
 
 
+// Section navigation changes presentation only; answers and recommendation rules are retained.
+const questionnaireSections = [...form.querySelectorAll(".question-section")];
+const questionnaireFields = [...form.querySelectorAll("input, select")];
+const sectionButtons = [...document.querySelectorAll(".section-link")];
+const previousSectionButton = document.getElementById("previousSection");
+const nextSectionButton = document.getElementById("nextSection");
+const generateButton = document.getElementById("generateRecommendations");
+let activeSection = 0;
+
+function showQuestionnaireSection(index, focusHeading = true) {
+    activeSection = Math.max(0, Math.min(index, questionnaireSections.length - 1));
+    questionnaireSections.forEach((section, sectionIndex) => {
+        section.hidden = sectionIndex !== activeSection;
+    });
+    sectionButtons.forEach((button, sectionIndex) => {
+        if (sectionIndex === activeSection) button.setAttribute("aria-current", "step");
+        else button.removeAttribute("aria-current");
+    });
+    document.getElementById("sectionPosition").textContent =
+        "Section " + (activeSection + 1) + " of " + questionnaireSections.length;
+    previousSectionButton.disabled = activeSection === 0;
+    nextSectionButton.hidden = activeSection === questionnaireSections.length - 1;
+    generateButton.hidden = activeSection !== questionnaireSections.length - 1;
+    if (focusHeading) questionnaireSections[activeSection].querySelector("legend").focus();
+}
+
+function updateAssessmentProgress() {
+    const answered = questionnaireFields.filter(field => field.value.trim() !== "").length;
+    document.getElementById("assessmentProgress").value = answered;
+    document.getElementById("progressPercent").textContent = Math.round(answered / 20 * 100) + "%";
+    document.getElementById("progressText").textContent = answered + " of 20 questions answered";
+    questionnaireSections.forEach((section, index) => {
+        const fields = [...section.querySelectorAll("input, select")];
+        const complete = fields.filter(field => field.value.trim() !== "").length;
+        sectionButtons[index].querySelector(".section-counter").textContent = complete + "/" + fields.length;
+        sectionButtons[index].classList.toggle("is-complete", complete === fields.length);
+    });
+}
+
+sectionButtons.forEach((button, index) => {
+    button.addEventListener("click", () => showQuestionnaireSection(index));
+});
+previousSectionButton.addEventListener("click", () => showQuestionnaireSection(activeSection - 1));
+nextSectionButton.addEventListener("click", () => showQuestionnaireSection(activeSection + 1));
+form.addEventListener("input", updateAssessmentProgress);
+form.addEventListener("change", updateAssessmentProgress);
+
+// Native constraints remain intact. Reveal a hidden invalid field before reporting it.
+// Without JavaScript the full form remains visible and uses native validation.
+form.noValidate = true;
+document.getElementById("assessmentSidebar").hidden = false;
+document.getElementById("sectionPosition").hidden = false;
+document.getElementById("sectionActions").hidden = false;
+form.classList.add("has-section-navigation");
+showQuestionnaireSection(0, false);
+updateAssessmentProgress();
+window.addEventListener("pageshow", updateAssessmentProgress);
+
 // ==========================================
 // QUESTIONNAIRE SUBMISSION
 // ==========================================
 
 form.addEventListener("submit", function(event) {
     event.preventDefault();
+
+    const missingField = questionnaireFields.find(field => field.willValidate && !field.validity.valid);
+    if (missingField) {
+        const sectionIndex = questionnaireSections.indexOf(missingField.closest(".question-section"));
+        showQuestionnaireSection(sectionIndex, false);
+        missingField.focus();
+        missingField.reportValidity();
+        return;
+    }
 
     // Collect all 21 questionnaire answers
     const organizationData = {
