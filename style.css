@@ -1,30 +1,64 @@
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f9;
-    margin: 0;
-    color: #1f2937;
+/* Antzecure brand palette: red sampled from the supplied original logo. */
+:root { --navy: #041E42; --red: #BE101A; --gray: #B1B3B3; --muted: #526174; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+body { font-family: Arial, sans-serif; background: #FFFFFF; margin: 0; color: var(--navy); line-height: 1.6; }
+a { color: inherit; text-underline-offset: 5px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--red); outline-offset: 5px; }
+.skip-link { position: absolute; left: 16px; top: -100px; background: white; padding: 12px; z-index: 2; }
+.skip-link:focus { top: 12px; }
+header { border-bottom: 1px solid #e6e9ed; }
+.navigation { max-width: 1200px; margin: auto; min-height: 96px; padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.brand { font-size: 28px; font-weight: 800; letter-spacing: -1px; text-decoration: none; }
+.brand { display: inline-flex; flex-shrink: 0; }
+.brand-logo { display: block; width: 128px; height: auto; object-fit: contain; }
+.nav-links { display: flex; gap: 32px; align-items: center; font-size: 14px; font-weight: 700; }
+.nav-links a { text-decoration: none; }
+.nav-links a:hover, .nav-links a:active { color: var(--red); }
+.nav-assessment { border-bottom: 2px solid var(--red); padding: 8px 0; }
+.nav-assessment span { margin-left: 12px; color: var(--red); }
+main { max-width: 1200px; margin: auto; padding: 0 32px; }
+.hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 64px; align-items: center; padding: 80px 0 88px; }
+.eyebrow { color: var(--red); font-size: 12px; letter-spacing: 2px; font-weight: 700; margin: 0 0 20px; }
+h1 { font-size: clamp(30px, 3.2vw, 42px); line-height: 1.2; letter-spacing: -1.2px; margin: 0 0 24px; max-width: 540px; }
+.hero-description { color: var(--muted); font-size: 17px; line-height: 1.85; margin: 0 0 30px; }
+.button { display: inline-flex; align-items: center; gap: 28px; background: var(--red); color: white; padding: 14px 24px; border-radius: 6px; font-weight: 700; text-decoration: none; }
+.button:hover { background: #a7101a; }
+.hero-note { color: var(--muted); font-size: 13px; margin: 16px 0 0; }
+.how-it-works { background: var(--navy); color: white; padding: 34px; border-radius: 16px; }
+.how-it-works h2 { font-size: 12px; font-weight: 700; letter-spacing: 2px; margin: 0 0 12px; }
+.steps { list-style: none; margin: 0; padding: 0; }
+.steps li { display: flex; gap: 18px; padding: 24px 0; border-bottom: 1px solid #ffffff26; }
+.steps li:last-child { border-bottom: 0; padding-bottom: 0; }
+.step-number { color: var(--red); font-size: 27px; font-weight: 800; line-height: 1.2; }
+.steps h3 { font-size: 17px; line-height: 1.5; margin: 0 0 9px; }
+.steps p { color: #ced3da; font-size: 14px; line-height: 1.8; margin: 0; }
+.assessment { max-width: 780px; margin: 0 auto 72px; padding-top: 48px; border-top: 1px solid var(--gray); }
+.assessment > h2 { font-size: 28px; line-height: 1.3; margin: 0 0 16px; }
+.assessment > p { color: var(--muted); }
+form h2 { font-size: 21px; margin: 36px 0 0; border-top: 1px solid #e6e9ed; padding-top: 28px; }
+form p { color: var(--muted); margin: 0; }
+footer { border-top: 1px solid #e6e9ed; padding: 28px 32px; display: flex; justify-content: center; flex-wrap: wrap; align-items: center; gap: 24px; font-size: 13px; color: var(--muted); }
+footer p { margin: 0; }
+.footer-brand { color: var(--navy); font-size: 18px; font-weight: 700; text-decoration: none; }
+@media (max-width: 800px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; padding: 48px 0; }
+    .hero-copy { max-width: 600px; }
+    .navigation { min-height: 80px; }
+    .how-it-works { padding: 28px; }
 }
-
-header {
-    background-color: #0b2345;
-    color: white;
-    text-align: center;
-    padding: 30px;
+@media (max-width: 480px) {
+    main { padding: 0 20px; }
+    .navigation { padding: 18px 20px; flex-wrap: wrap; gap: 12px; }
+    .brand { font-size: 25px; }
+    .nav-links { gap: 18px; font-size: 12px; flex-wrap: wrap; }
+    .hero-description { font-size: 16px; }
+    .how-it-works { padding: 24px; }
+    .steps li { gap: 12px; }
+    .steps h3 { font-size: 16px; }
+    footer { justify-content: flex-start; gap: 12px; padding: 24px 20px; }
 }
-
-header h1 {
-    margin-bottom: 10px;
-}
-
-main {
-    max-width: 700px;
-    margin: 40px auto;
-    background-color: white;
-    padding: 35px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 form {
     display: flex;
@@ -46,7 +80,7 @@ input, select {
 }
 
 button {
-    background-color: #f97316;
+    background-color: var(--red);
     color: white;
     padding: 14px;
     border: none;
@@ -58,7 +92,7 @@ button {
 }
 
 button:hover {
-    background-color: #ea580c;
+    background-color: #a7101a;
 }
 
 #results {
@@ -74,8 +108,8 @@ button:hover {
 
 
 #recommendationsOutput {
-    background-color: #fff7ed;
-    border-left: 5px solid #f97316;
+    background-color: #fff5f5;
+    border-left: 5px solid var(--red);
     padding: 20px;
     border-radius: 8px;
     margin-top: 15px;
@@ -103,13 +137,13 @@ button:hover {
     margin-bottom: 20px;
     padding: 15px;
     background-color: white;
-    border-left: 4px solid #0b2345;
+    border-left: 4px solid #041E42;
     border-radius: 6px;
 }
 
 .plan-step h3 {
     margin-top: 0;
-    color: #0b2345;
+    color: #041E42;
 }
 
 .plan-step p {
@@ -155,11 +189,11 @@ button:hover {
 }
 
 .recommendation-card.medium {
-    border-left-color: #f97316;
+    border-left-color: var(--red);
 }
 
 .recommendation-card.medium h3 {
-    color: #c2410c;
+    color: var(--red);
 }
 
 .recommendation-card.low {
