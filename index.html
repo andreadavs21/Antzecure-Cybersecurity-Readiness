@@ -436,15 +436,19 @@
 
     <section id="results" hidden>
 
-        <h2>Organization Profile</h2>
-        <div id="profileOutput"></div>
+        <details class="organization-profile" id="organizationProfile">
+            <summary>Organization Profile <svg class="profile-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+            <div id="profileOutput"></div>
+        </details>
 
-        <h2>Cybersecurity Recommendations</h2>
-        <p>
-            Personalized cybersecurity recommendations
-            based on your organization's answers.
-        </p>
-        <div id="recommendationsOutput"></div>
+        <div class="results-heading">
+            <div><p class="eyebrow">YOUR ASSESSMENT RESULTS</p><h2>Cybersecurity Recommendations</h2></div>
+            <button type="button" id="downloadReport">Download PDF Report</button>
+        </div>
+        <p>Personalized recommendations based on your organization's answers, organized by priority.</p>
+        <div id="recommendationsOutput" class="recommendation-summary" aria-label="Recommendations by priority"></div>
+        <p class="report-help">Opens a print-friendly report with all recommendations and their NIST CSF 2.0 references. Choose “Print / Save as PDF”, then select “Save as PDF” in your browser.</p>
+        <p id="reportStatus" role="status"></p>
 
         <p class="disclaimer">
     These recommendations are based on information
