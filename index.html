@@ -11,35 +11,45 @@
 <body>
 
 <a class="skip-link" href="#assessment">Skip to assessment</a>
-<header id="home">
+<div class="homepage-panel" id="home">
+<header>
     <nav class="navigation" aria-label="Main navigation">
         <a class="brand" href="#home" aria-label="Antzecure home"><img class="brand-logo" src="public/assets/antzecure-logo.png" alt="" width="65" height="52" fetchpriority="high"><span>Antzecure</span></a>
         <div class="nav-links">
             <a href="#home">Home</a>
-            <a href="#how-it-works">How It Works</a>
-            <a class="nav-assessment" href="#assessment">Start Assessment <span aria-hidden="true">→</span></a>
+            <a href="#assessment">Assessment</a>
         </div>
     </nav>
 </header>
 
-<main>
+
     <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
             <p class="eyebrow">CYBERSECURITY READINESS</p>
             <h1 id="hero-title">Be Prepared Before a Cyber Incident Happens.</h1>
             <p class="hero-description">Antzecure helps small businesses and nonprofits understand their cybersecurity readiness through a guided assessment. Based on your answers, it provides personalized recommendations and practical steps to help your organization prepare for security incidents.</p>
-            <a class="button" href="#assessment">Start Assessment <span aria-hidden="true">→</span></a>
-            <p class="hero-note">For small businesses &amp; nonprofits</p>
+            <a class="button" href="#assessment">Start Assessment</a>
         </div>
-        <aside class="how-it-works" id="how-it-works" aria-labelledby="how-title">
-            <h2 id="how-title">HOW IT WORKS</h2>
-            <ol class="steps">
-                <li><span class="step-number" aria-hidden="true">01</span><div><h3>Answer the Assessment</h3><p>Complete a short questionnaire about your organization's current security practices.</p></div></li>
-                <li><span class="step-number" aria-hidden="true">02</span><div><h3>Understand Your Gaps</h3><p>See which areas need attention based on your responses.</p></div></li>
-                <li><span class="step-number" aria-hidden="true">03</span><div><h3>Get Personalized Guidance</h3><p>Receive practical recommendations to improve your cybersecurity readiness.</p></div></li>
-            </ol>
-        </aside>
     </section>
+    <section class="feature-cards" aria-label="How Antzecure helps">
+        <article class="feature-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="5" width="14" height="17" rx="2"/><path d="M9 5V3h8v2M9 11h1m3 0h4m-8 5h1m3 0h4"/></svg>
+            <h2>Assess</h2>
+            <p>Understand your cybersecurity readiness.</p>
+        </article>
+        <article class="feature-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3.5 7v6c0 5 8.5 9 8.5 9s8.5-4 8.5-9V7L12 3Z"/><path d="m8 12 3 3 5-6"/></svg>
+            <h2>Improve</h2>
+            <p>Identify important security gaps and recommended actions.</p>
+        </article>
+        <article class="feature-card">
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="15" height="19" rx="2"/><path d="M9 8h7M9 12h7M9 16h4"/></svg>
+            <h2>Prepare</h2>
+            <p>Get practical guidance to prepare for cybersecurity incidents.</p>
+        </article>
+    </section>
+</div>
+<main id="main-content">
     <section class="assessment" id="assessment" aria-labelledby="assessment-title" tabindex="-1">
     <p class="eyebrow">YOUR NEXT STEP</p>
     <h2 id="assessment-title">Cybersecurity Readiness Questionnaire</h2>
@@ -60,14 +70,17 @@
         <!-- SECTION 1: GOVERN -->
         <!-- ====================================== -->
 
-        <h2>Section 1: Govern (GV)</h2>
+
+        <fieldset class="question-section">
+            <legend>Section 1: Govern (GV)</legend>
+
 
         <p>
-            This section helps identify who manages cybersecurity 
+            This section helps identify who manages cybersecurity
             and makes important security decisions within your organization.
         </p>
 
-        <label for="organizationName">
+        <div class="question"><label for="organizationName">
             1. What is the name of your organization?
         </label>
         <input
@@ -75,9 +88,9 @@
             id="organizationName"
             placeholder="Organization name"
             required
-        >
+        ></div>
 
-        <label for="employeeCount">
+        <div class="question"><label for="employeeCount">
             2. How many employees work at your organization?
         </label>
         <select id="employeeCount" required>
@@ -86,9 +99,9 @@
             <option value="11-25">11–25 employees</option>
             <option value="26-50">26–50 employees</option>
             <option value="51+">51+ employees</option>
-        </select>
+        </select></div>
 
-        <label for="itSupport">
+        <div class="question"><label for="itSupport">
             3. Who is responsible for managing your
             organization's IT systems and cybersecurity?
         </label>
@@ -106,20 +119,21 @@
             <option value="No IT Support">
                 No Dedicated IT Support
             </option>
-        </select>
+        </select></div>
 
-        <!-- ====================================== -->
-        <!-- SECTION 2: IDENTIFY -->
-        <!-- ====================================== -->
 
-        <h2>Section 2: Identify (ID)</h2>
+        </fieldset>
+
+        <fieldset class="question-section">
+            <legend>Section 2: Identify (ID)</legend>
+
 
         <p>
             This section helps determine which systems and information
             are most important to your organization's daily operations.
         </p>
 
-        <label for="criticalSystems">
+        <div class="question"><label for="criticalSystems">
             4. Which system is most critical
             to your daily operations?
         </label>
@@ -138,9 +152,9 @@
             <option value="Website">Website</option>
             <option value="Other">Other</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="sensitiveData">
+        <div class="question"><label for="sensitiveData">
             5. Does your organization handle sensitive
             customer, employee, or financial information?
         </label>
@@ -149,20 +163,21 @@
             <option value="Yes">Yes</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <!-- ====================================== -->
-        <!-- SECTION 3: PROTECT -->
-        <!-- ====================================== -->
 
-        <h2>Section 3: Protect (PR)</h2>
+        </fieldset>
+
+        <fieldset class="question-section">
+            <legend>Section 3: Protect (PR)</legend>
+
 
         <p>
-            This section evaluates the basic security measures your 
+            This section evaluates the basic security measures your
             organization uses to protect accounts, employees, and data.
         </p>
 
-        <label for="mfa">
+        <div class="question"><label for="mfa">
             6. Does your organization use multi-factor
             authentication (MFA) for important accounts?
         </label>
@@ -174,9 +189,9 @@
             </option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="employeeTraining">
+        <div class="question"><label for="employeeTraining">
             7. Does your organization provide cybersecurity
             awareness or incident response training?
         </label>
@@ -185,9 +200,9 @@
             <option value="Yes">Yes</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="backups">
+        <div class="question"><label for="backups">
             8. Does your organization maintain protected
             backups of critical data?
         </label>
@@ -196,20 +211,21 @@
             <option value="Yes">Yes</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <!-- ====================================== -->
-        <!-- SECTION 4: DETECT -->
-        <!-- ====================================== -->
 
-        <h2>Section 4: Detect (DE)</h2>
+        </fieldset>
+
+        <fieldset class="question-section">
+            <legend>Section 4: Detect (DE)</legend>
+
 
         <p>
-            This section helps determine whether your organization 
+            This section helps determine whether your organization
             can recognize suspicious activity before it causes more damage.
         </p>
 
-        <label for="employeeAwareness">
+        <div class="question"><label for="employeeAwareness">
             9. Do employees know how to recognize
             and report suspicious cybersecurity activity?
         </label>
@@ -221,9 +237,9 @@
             </option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="securityMonitoring">
+        <div class="question"><label for="securityMonitoring">
             10. Does your organization use security tools
             or services to detect suspicious activity?
         </label>
@@ -233,20 +249,21 @@
             <option value="Partially">Partially</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <!-- ====================================== -->
-        <!-- SECTION 5: RESPOND -->
-        <!-- ====================================== -->
 
-        <h2>Section 5: Respond (RS)</h2>
+        </fieldset>
+
+        <fieldset class="question-section">
+            <legend>Section 5: Respond (RS)</legend>
+
 
         <p>
-            This section identifies whether your organization knows whom to contact 
+            This section identifies whether your organization knows whom to contact
             and what actions to take when a cybersecurity incident occurs
         </p>
 
-        <label for="existingPlan">
+        <div class="question"><label for="existingPlan">
             11. Does your organization have a written
             cybersecurity incident response plan?
         </label>
@@ -256,9 +273,9 @@
             <option value="Partially">Partially / In Progress</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="emergencyContact">
+        <div class="question"><label for="emergencyContact">
             12. Who should employees contact first
             during a cybersecurity incident?
         </label>
@@ -267,9 +284,9 @@
             id="emergencyContact"
             placeholder="Example: IT Manager or Not Assigned"
             required
-        >
+        ></div>
 
-        <label for="alternateContact">
+        <div class="question"><label for="alternateContact">
             13. Does your organization have an
             alternate emergency contact?
         </label>
@@ -278,9 +295,9 @@
             <option value="Yes">Yes</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="reportingMethod">
+        <div class="question"><label for="reportingMethod">
             14. How should employees report
             a suspected cybersecurity incident?
         </label>
@@ -293,9 +310,9 @@
             <option value="Not Established">
                 Not Established
             </option>
-        </select>
+        </select></div>
 
-        <label for="deviceIsolation">
+        <div class="question"><label for="deviceIsolation">
             15. Does your organization have an approved
             procedure for isolating compromised devices?
         </label>
@@ -304,9 +321,9 @@
             <option value="Yes">Yes</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="incidentSeverity">
+        <div class="question"><label for="incidentSeverity">
             16. Does your organization have a process
             for assessing the severity of cyber incidents?
         </label>
@@ -316,9 +333,9 @@
             <option value="Partially">Partially</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="responseExercises">
+        <div class="question"><label for="responseExercises">
             17. Has your organization practiced responding
             to cybersecurity incidents through exercises
             or simulations?
@@ -328,20 +345,21 @@
             <option value="Yes">Yes</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <!-- ====================================== -->
-        <!-- SECTION 6: RECOVER -->
-        <!-- ====================================== -->
 
-        <h2>Section 6: Recover (RC)</h2>
+        </fieldset>
+
+        <fieldset class="question-section">
+            <legend>Section 6: Recover (RC)</legend>
+
 
         <p>
-            This section evaluates whether your organization can restore important systems 
+            This section evaluates whether your organization can restore important systems
             and continue operations after a cybersecurity incident.
         </p>
 
-        <label for="backupTesting">
+        <div class="question"><label for="backupTesting">
             18. Have your backups been tested to confirm
             that critical data can be restored?
         </label>
@@ -351,9 +369,9 @@
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
             <option value="Not Applicable">Not Applicable</option>
-        </select>
+        </select></div>
 
-        <label for="recoveryProcedures">
+        <div class="question"><label for="recoveryProcedures">
             19. Does your organization have documented
             procedures for restoring critical systems
             after a cybersecurity incident?
@@ -364,9 +382,9 @@
             <option value="Partially">Partially</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
-        <label for="recoveryCommunication">
+        <div class="question"><label for="recoveryCommunication">
             20. Does your organization have a process
             for communicating recovery progress
             to employees or affected stakeholders?
@@ -377,12 +395,14 @@
             <option value="Partially">Partially</option>
             <option value="No">No</option>
             <option value="Not Sure">Not Sure</option>
-        </select>
+        </select></div>
 
 
 
 
 
+
+        </fieldset>
         <button type="submit">
             Generate Readiness Recommendations
         </button>
