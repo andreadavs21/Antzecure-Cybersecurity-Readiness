@@ -65,14 +65,33 @@
     </p>
 
     <form id="organizationForm">
+        <div class="assessment-layout">
+            <aside class="assessment-sidebar" id="assessmentSidebar" hidden aria-label="Assessment navigation">
+                <div class="assessment-progress">
+                    <div class="progress-heading"><strong>Your progress</strong><span id="progressPercent">0%</span></div>
+                    <progress id="assessmentProgress" max="20" value="0" aria-label="Questions answered"></progress>
+                    <p id="progressText" role="status">0 of 20 questions answered</p>
+                </div>
+                <nav class="section-navigation" aria-label="Questionnaire sections">
+                    <button type="button" class="section-link" data-section="0" aria-controls="question-section-0"><span class="section-order">01</span><span>Govern</span><span class="section-counter">0/3</span></button>
+                    <button type="button" class="section-link" data-section="1" aria-controls="question-section-1"><span class="section-order">02</span><span>Identify</span><span class="section-counter">0/2</span></button>
+                    <button type="button" class="section-link" data-section="2" aria-controls="question-section-2"><span class="section-order">03</span><span>Protect</span><span class="section-counter">0/3</span></button>
+                    <button type="button" class="section-link" data-section="3" aria-controls="question-section-3"><span class="section-order">04</span><span>Detect</span><span class="section-counter">0/2</span></button>
+                    <button type="button" class="section-link" data-section="4" aria-controls="question-section-4"><span class="section-order">05</span><span>Respond</span><span class="section-counter">0/7</span></button>
+                    <button type="button" class="section-link" data-section="5" aria-controls="question-section-5"><span class="section-order">06</span><span>Recover</span><span class="section-counter">0/3</span></button>
+                </nav>
+                <p class="assessment-help">Move between sections at any time. Your answers stay here while this page is open.</p>
+            </aside>
+            <div class="assessment-fields">
+                <p class="section-position" id="sectionPosition" hidden>Section 1 of 6</p>
 
         <!-- ====================================== -->
         <!-- SECTION 1: GOVERN -->
         <!-- ====================================== -->
 
 
-        <fieldset class="question-section">
-            <legend>Section 1: Govern (GV)</legend>
+        <fieldset class="question-section" id="question-section-0">
+            <legend tabindex="-1">Section 1: Govern (GV)</legend>
 
 
         <p>
@@ -124,8 +143,8 @@
 
         </fieldset>
 
-        <fieldset class="question-section">
-            <legend>Section 2: Identify (ID)</legend>
+        <fieldset class="question-section" id="question-section-1">
+            <legend tabindex="-1">Section 2: Identify (ID)</legend>
 
 
         <p>
@@ -168,8 +187,8 @@
 
         </fieldset>
 
-        <fieldset class="question-section">
-            <legend>Section 3: Protect (PR)</legend>
+        <fieldset class="question-section" id="question-section-2">
+            <legend tabindex="-1">Section 3: Protect (PR)</legend>
 
 
         <p>
@@ -216,8 +235,8 @@
 
         </fieldset>
 
-        <fieldset class="question-section">
-            <legend>Section 4: Detect (DE)</legend>
+        <fieldset class="question-section" id="question-section-3">
+            <legend tabindex="-1">Section 4: Detect (DE)</legend>
 
 
         <p>
@@ -254,8 +273,8 @@
 
         </fieldset>
 
-        <fieldset class="question-section">
-            <legend>Section 5: Respond (RS)</legend>
+        <fieldset class="question-section" id="question-section-4">
+            <legend tabindex="-1">Section 5: Respond (RS)</legend>
 
 
         <p>
@@ -350,8 +369,8 @@
 
         </fieldset>
 
-        <fieldset class="question-section">
-            <legend>Section 6: Recover (RC)</legend>
+        <fieldset class="question-section" id="question-section-5">
+            <legend tabindex="-1">Section 6: Recover (RC)</legend>
 
 
         <p>
@@ -403,9 +422,13 @@
 
 
         </fieldset>
-        <button type="submit">
-            Generate Readiness Recommendations
-        </button>
+                <div class="section-actions" id="sectionActions" hidden>
+                    <button type="button" class="secondary-button" id="previousSection">← Previous Section</button>
+                    <button type="button" id="nextSection">Next Section →</button>
+                </div>
+                <button type="submit" id="generateRecommendations">Generate Readiness Recommendations</button>
+            </div>
+        </div>
 
     </form>
 
