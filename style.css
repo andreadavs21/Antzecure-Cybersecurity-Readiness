@@ -225,3 +225,61 @@ footer p { margin: 0; }
     .report-header h1 { font-size: 22pt; }
     .report-page .report-header { border-bottom-color: #BE101A; }
 }
+
+/* Preparedness resources reuse the existing standalone print view. */
+.conditional-note { margin: 24px 0; padding: 14px 16px; border-left: 3px solid var(--red); border-radius: 5px; background: #fff4f5; color: var(--muted); font-size: 14px; }
+.resource-intro, .resource-context { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.contact-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+.resource-field { display: flex; flex-direction: column; min-width: 0; gap: 5px; }
+.resource-label { font-size: 12px; font-weight: 700; }
+.resource-field input { font-size: 13px; min-height: 36px; padding: 7px 9px; }
+.print-field-value { display: none; }
+.contact-sequence ol { padding-left: 20px; font-size: 13px; line-height: 1.8; }
+.action-check { display: flex; align-items: start; gap: 10px; font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.action-check input { flex: 0 0 16px; width: 16px; min-width: 16px; height: 16px; min-height: 16px; margin: 4px 0 0; padding: 0; accent-color: var(--red); }
+.roadmap-action .action-estimates { margin-top: 12px; color: var(--muted); font-size: 11px; }
+.roadmap-action .resource-field { margin-top: 12px; }
+.exercise-safety { border-left: 3px solid var(--red); padding: 12px 16px; background: #fff4f5; font-weight: 600; }
+.exercise-context dt { font-size: 12px; font-weight: 700; margin-top: 12px; }
+.exercise-context dd { margin: 2px 0; font-size: 13px; }
+.exercise-part { margin-bottom: 16px; }
+.exercise-part h3 { font-size: 16px; margin-bottom: 8px; }
+.exercise-part ul { margin: 0; padding-left: 22px; font-size: 13px; }
+.worksheet-answer h3 { font-size: 14px; margin: 18px 0 0; }
+.writing-lines { height: 64px; border-bottom: 1px solid var(--gray); }
+@media (max-width: 600px) { .contact-fields { grid-template-columns: 1fr; } }
+@page contact-card { size: A4; margin: 12mm; }
+@media print {
+    .resource-field input { display: none; }
+    .print-field-value { display: block; min-height: 18px; padding: 2px 0 5px; border-bottom: 1px solid #B1B3B3; font-size: 10pt; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .resource-contacts { page: contact-card; }
+    .resource-contacts .report-header { padding-bottom: 12px; }
+    .resource-contacts .report-header h1 { font-size: 18pt; }
+    .resource-contacts .report-metadata { padding: 12px 0 4px; }
+    .resource-contacts .resource-intro, .resource-contacts .resource-context { font-size: 9pt; margin: 8px 0; }
+    .resource-contacts .contact-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 18px; }
+    .resource-contacts .resource-label { font-size: 9pt; }
+    .resource-contacts .print-field-value { font-size: 9pt; line-height: 1.3; }
+    .resource-contacts .contact-sequence { margin-top: 14px; }
+    .resource-contacts .contact-sequence h2 { font-size: 14pt; margin-bottom: 8px; }
+    .resource-contacts .contact-sequence ol { font-size: 9pt; line-height: 1.6; margin: 8px 0; }
+    .resource-field, .exercise-part, .worksheet-answer { break-inside: avoid; page-break-inside: avoid; }
+    .facilitator-guide, .lessons-worksheet { break-before: page; page-break-before: always; }
+    .readiness-report .action-estimates { color: #526174; }
+    .action-check input { display: inline-block; }
+}
+
+.cross-observations { margin-top: 28px; border-top: 1px solid var(--border); padding-top: 24px; }
+.cross-observations h3 { font-size: 18px; margin: 0 0 10px; }
+.observations-intro, #observationOutput p { color: var(--muted); font-size: 13px; }
+.observation-card { margin-top: 12px; padding: 18px 20px; border: 1px solid var(--border); border-left: 3px solid var(--navy); background: white; border-radius: 8px; }
+.observation-card h4 { margin: 0 0 8px; font-size: 15px; }
+.observation-card p { margin: 0; }
+.preparedness-resources { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.preparedness-resources > p { font-size: 13px; color: var(--muted); }
+.resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+.resource-card { display: flex; flex-direction: column; min-width: 0; gap: 14px; padding: 24px; background: white; border: 1px solid var(--border); border-radius: 10px; }
+.resource-card h3 { font-size: 18px; line-height: 1.4; margin: 0; }
+.resource-card p { color: var(--muted); font-size: 13px; margin: 0 0 auto; }
+.resource-card button { width: 100%; padding: 13px 16px; font-size: 13px; }
+@media (max-width: 600px) { .resource-grid { grid-template-columns: 1fr; } .resource-card { padding: 20px; } }
