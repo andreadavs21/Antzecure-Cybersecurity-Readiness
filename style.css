@@ -283,3 +283,11 @@ footer p { margin: 0; }
 .resource-card p { color: var(--muted); font-size: 13px; margin: 0 0 auto; }
 .resource-card button { width: 100%; padding: 13px 16px; font-size: 13px; }
 @media (max-width: 600px) { .resource-grid { grid-template-columns: 1fr; } .resource-card { padding: 20px; } }
+
+/* Reading preference is outside the assessment form and progress count. */
+.plain-language-setting { margin: 24px 0; padding: 16px 18px; background: #f7f8fa; border: 1px solid var(--border); border-radius: 9px; }
+.plain-language-toggle { display: flex; align-items: center; gap: 12px; min-height: 32px; width: fit-content; max-width: 100%; font-size: 15px; font-weight: 600; cursor: pointer; }
+.plain-language-toggle input { flex: 0 0 18px; width: 18px; min-width: 18px; height: 18px; min-height: 18px; padding: 0; margin: 0; accent-color: var(--red); cursor: pointer; }
+#explainTermsHint { margin: 6px 0 0 30px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.plain-language-help { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+@media (max-width: 480px) { .plain-language-setting { padding: 14px; } .plain-language-toggle { font-size: 14px; } }

@@ -1223,3 +1223,51 @@ function evaluateReadiness(organizationData) {
     }
     return { recommendations, observations };
 }
+
+// Optional reading aids live outside assessment data and never enter generated reports.
+(() => {
+    const toggle = document.getElementById("explainTerms");
+    const preferenceKey = "antzecure.explainTerms";
+    const explanations = {
+        itSupport: "IT support means the people who help keep your computers, accounts, and other technology working safely.",
+        criticalSystems: "Critical systems are the tools your organization relies on to do its work, such as email, payment software, or customer records.",
+        sensitiveData: "Sensitive information is information that could harm someone if shared without permission, such as payroll details or customer addresses.",
+        mfa: "Multi-factor authentication (MFA) adds another check when signing in, such as a code from an app as well as your password.",
+        employeeTraining: "Cybersecurity training helps people spot risks and know what to do, such as reporting an unexpected request for money.",
+        backups: "Backups are separate copies of important files that can help you get information back if the originals are lost or damaged.",
+        securityMonitoring: "Security monitoring means using tools or services to watch for unusual activity, such as someone signing in from an unexpected place.",
+        existingPlan: "An incident response plan is a written guide explaining who to contact and what to do when a security problem occurs.",
+        deviceIsolation: "Device isolation is a containment step that limits a problem from spreading, such as disconnecting an affected computer when directed by your IT responder.",
+        incidentSeverity: "Incident severity describes how serious a security problem is, such as whether it affects one person's email or stops the whole organization working.",
+        responseExercises: "A response exercise lets your team practice discussing a made-up security problem before a real one happens.",
+        backupTesting: "Backup testing means checking that saved copies can actually restore the information you need, rather than only checking that copies exist.",
+        recoveryProcedures: "Recovery means safely getting important information and tools working again after a security problem, such as restoring files from a backup.",
+        recoveryCommunication: "Recovery updates tell affected people what is working again, what is still unavailable, and when to expect more information."
+    };
+    const help = Object.entries(explanations).map(([id, text]) => {
+        const field = document.getElementById(id);
+        const note = document.createElement("p");
+        note.id = id + "PlainLanguageHelp";
+        note.className = "plain-language-help";
+        note.textContent = text;
+        field.after(note);
+        return { field, note };
+    });
+    function updateExplanations() {
+        help.forEach(({ field, note }) => {
+            note.hidden = !toggle.checked;
+            const descriptions = new Set((field.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean));
+            if (toggle.checked) descriptions.add(note.id);
+            else descriptions.delete(note.id);
+            if (descriptions.size) field.setAttribute("aria-describedby", [...descriptions].join(" "));
+            else field.removeAttribute("aria-describedby");
+        });
+    }
+    try { toggle.checked = localStorage.getItem(preferenceKey) !== "off"; } catch { /* Explanations default on when storage is unavailable. */ }
+    updateExplanations();
+    document.getElementById("plainLanguageSetting").hidden = false;
+    toggle.addEventListener("change", () => {
+        updateExplanations();
+        try { localStorage.setItem(preferenceKey, toggle.checked ? "on" : "off"); } catch { /* The toggle still works for this page. */ }
+    });
+})();
