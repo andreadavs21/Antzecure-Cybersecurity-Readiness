@@ -20,14 +20,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 header { border-bottom: 1px solid var(--border); }
 .navigation { min-height: 96px; padding: 18px var(--page-padding); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .brand { display: inline-flex; align-items: center; gap: 12px; min-width: 0; flex-shrink: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.8px; text-decoration: none; }
-.brand-logo { display: block; width: auto; height: 48px; max-height: 50px; max-width: 64px; object-fit: contain; flex: 0 0 auto; }
+.brand-logo { display: block; width: auto; height: 56px; max-height: 56px; max-width: 72px; object-fit: contain; flex: 0 0 auto; }
 .nav-links { display: flex; gap: 28px; align-items: center; font-size: 16px; }
 .nav-links a { text-decoration: none; white-space: nowrap; padding-block: 10px; }
 .nav-links a:hover { color: var(--red); }
-.hero { padding: 56px var(--page-padding) 44px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 64px); align-items: center; padding: 48px var(--page-padding) 44px; }
+.hero-copy { min-width: 0; }
+.hero h1 { max-width: 600px; font-size: clamp(36px, 3.4vw, 48px); }
 .eyebrow { color: var(--red); font-size: 12px; letter-spacing: 1.5px; font-weight: 700; margin: 0 0 20px; }
 h1 { font-size: clamp(36px, 3vw, 44px); line-height: 1.22; letter-spacing: -1px; margin: 0 0 24px; font-weight: 700; }
-.hero-description { color: var(--muted); font-size: 18px; line-height: 1.75; margin: 0 0 28px; max-width: 1080px; }
+.hero-description { color: var(--muted); font-size: 18px; line-height: 1.75; margin: 0 0 28px; max-width: 590px; }
 .button { display: inline-flex; align-items: center; justify-content: center; background: var(--red); color: white; padding: 17px 27px; border-radius: 10px; font-size: 20px; font-weight: 700; text-decoration: none; }
 .button:hover { background: #a7101a; }
 .feature-cards { margin-inline: var(--page-padding); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
@@ -87,7 +89,7 @@ footer p { margin: 0; }
     .homepage-panel { padding-bottom: 20px; }
     .navigation { min-height: 80px; flex-wrap: wrap; gap: 8px 16px; padding-block: 14px; }
     .brand { font-size: 22px; gap: 8px; }
-    .brand-logo { height: 40px; max-height: 40px; max-width: 52px; }
+    .brand-logo { height: 44px; max-height: 44px; max-width: 57px; }
     .nav-links { width: 100%; justify-content: flex-end; gap: 22px; font-size: 13px; }
     .nav-links a { padding-block: 6px; }
     .hero { padding: 32px var(--page-padding); }
@@ -283,3 +285,38 @@ footer p { margin: 0; }
 .resource-card p { color: var(--muted); font-size: 13px; margin: 0 0 auto; }
 .resource-card button { width: 100%; padding: 13px 16px; font-size: 13px; }
 @media (max-width: 600px) { .resource-grid { grid-template-columns: 1fr; } .resource-card { padding: 20px; } }
+
+/* Reading preference is outside the assessment form and progress count. */
+.plain-language-setting { margin: 24px 0; padding: 16px 18px; background: #f7f8fa; border: 1px solid var(--border); border-radius: 9px; }
+.plain-language-toggle { display: flex; align-items: center; gap: 12px; min-height: 32px; width: fit-content; max-width: 100%; font-size: 15px; font-weight: 600; cursor: pointer; }
+.plain-language-toggle input { flex: 0 0 18px; width: 18px; min-width: 18px; height: 18px; min-height: 18px; padding: 0; margin: 0; accent-color: var(--red); cursor: pointer; }
+#explainTermsHint { margin: 6px 0 0 30px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.plain-language-help { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+@media (max-width: 480px) { .plain-language-setting { padding: 14px; } .plain-language-toggle { font-size: 14px; } }
+
+/* Lightweight, self-contained colony illustration; no dashboard panel or external assets. */
+.colony-illustration { min-width: 0; margin: 0; width: 100%; max-width: 600px; justify-self: center; background: radial-gradient(ellipse at center, #fcf8f8 0%, #FFFFFF 68%); }
+.colony-network { display: block; width: 100%; height: auto; overflow: visible; }
+.colony-node > circle { fill: #FFFFFF; stroke: #dfe3e7; stroke-width: 1.5; }
+.colony-node > g { fill: none; stroke: var(--navy); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.colony-node-accent > circle { stroke: #e7b4b8; }
+.colony-node-accent > g { stroke: var(--red); }
+.colony-node text { fill: var(--navy); font: 500 18px Arial, sans-serif; }
+.colony-center-label { fill: var(--muted); font: 600 12px Arial, sans-serif; letter-spacing: 1.3px; }
+.colony-pulse { animation: colony-breathe 6s ease-in-out infinite; }
+@keyframes colony-breathe { 0%, 100% { opacity: 0.12; } 50% { opacity: 0.35; } }
+@media (max-width: 900px) {
+    .hero { gap: 24px; }
+    .hero h1 { font-size: 36px; }
+}
+@media (max-width: 800px) {
+    .hero { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .hero h1 { font-size: 34px; }
+    .colony-illustration { max-width: 520px; }
+}
+@media (max-width: 480px) {
+    .hero h1 { font-size: 32px; }
+    .colony-node text { font-size: 20px; }
+    .colony-center-label { font-size: 13px; letter-spacing: 0.8px; }
+}
+@media (prefers-reduced-motion: reduce) { .colony-pulse { animation: none; opacity: 0.18; } }

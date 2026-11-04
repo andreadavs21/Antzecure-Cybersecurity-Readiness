@@ -14,7 +14,7 @@
 <div class="homepage-panel" id="home">
 <header>
     <nav class="navigation" aria-label="Main navigation">
-        <a class="brand" href="#home" aria-label="Antzecure home"><img class="brand-logo" src="public/assets/antzecure-logo.png" alt="" width="65" height="52" fetchpriority="high"><span>Antzecure</span></a>
+        <a class="brand" href="#home" aria-label="Antzecure home"><img class="brand-logo" src="public/assets/antzecure-logo.png" alt="" width="70" height="56" fetchpriority="high"><span>Antzecure</span></a>
         <div class="nav-links">
             <a href="#home">Home</a>
             <a href="#assessment">Assessment</a>
@@ -25,11 +25,62 @@
 
     <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-            <p class="eyebrow">CYBERSECURITY READINESS</p>
-            <h1 id="hero-title">Be Prepared Before a Cyber Incident Happens.</h1>
-            <p class="hero-description">Antzecure helps small businesses and nonprofits understand their cybersecurity readiness through a guided assessment. Based on your answers, it provides personalized recommendations and practical steps to help your organization prepare for security incidents.</p>
+            <p class="eyebrow">BUILT TO PROTECT YOUR COLONY.</p>
+            <h1 id="hero-title">Be Prepared Before an Intruder Attacks.</h1>
+            <p class="hero-description">Every colony needs a defense plan. Antzecure helps small businesses and nonprofits identify security gaps, strengthen their defenses, and prepare for cyber incidents.</p>
             <a class="button" href="#assessment">Start Assessment</a>
         </div>
+        <figure class="colony-illustration">
+            <svg class="colony-network" viewBox="0 0 600 450" role="img" aria-labelledby="colony-title colony-description">
+                <title id="colony-title">Connected Colony Network</title>
+                <desc id="colony-description">A central shield protects the organization, connected to employees, devices, critical systems, sensitive data, and IT support.</desc>
+                <circle cx="300" cy="215" r="120" fill="#fafafa"/>
+                <circle cx="300" cy="215" r="88" fill="#fff5f5"/>
+                <g class="colony-connections" fill="none" stroke="#B1B3B3" stroke-width="1.4">
+                    <path d="M140 114 256 184"/>
+                    <path d="M446 110 344 181"/>
+                    <path d="M132 275 249 235"/>
+                    <path d="M464 267 351 234"/>
+                    <path d="M300 279v73"/>
+                </g>
+                <g fill="#BE101A">
+                    <circle cx="196" cy="148" r="3"/>
+                    <circle cx="404" cy="139" r="3"/>
+                    <circle cx="190" cy="255" r="3"/>
+                    <circle cx="408" cy="251" r="3"/>
+                    <circle cx="300" cy="324" r="3"/>
+                </g>
+                <circle class="colony-pulse" cx="300" cy="215" r="77" fill="none" stroke="#BE101A" stroke-width="1" opacity="0.18"/>
+                <text class="colony-center-label" x="300" y="120" text-anchor="middle">YOUR ORGANIZATION</text>
+                <path d="m300 156 51 21v40c0 34-22 55-51 69-29-14-51-35-51-69v-40l51-21Z" fill="#FFFFFF" stroke="#041E42" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="m282 217 13 13 26-30" fill="none" stroke="#BE101A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                <g class="colony-node">
+                    <circle cx="115" cy="100" r="28"/>
+                    <g transform="translate(103 88)"><circle cx="12" cy="7" r="4"/><path d="M4 23v-3a8 8 0 0 1 16 0v3M2 8a3 3 0 0 0 0 6m20-6a3 3 0 0 1 0 6"/></g>
+                    <text x="115" y="148" text-anchor="middle">Employees</text>
+                </g>
+                <g class="colony-node">
+                    <circle cx="470" cy="95" r="28"/>
+                    <g transform="translate(457 83)"><rect x="1" y="1" width="24" height="16" rx="2"/><path d="M13 17v5M7 23h12"/></g>
+                    <text x="470" y="143" text-anchor="middle">Devices</text>
+                </g>
+                <g class="colony-node colony-node-accent">
+                    <circle cx="105" cy="285" r="28"/>
+                    <g transform="translate(93 272)"><rect x="1" y="1" width="22" height="10" rx="2"/><rect x="1" y="15" width="22" height="10" rx="2"/><path d="M6 6h1m4 0h7M6 20h1m4 0h7"/></g>
+                    <text x="105" y="333" text-anchor="middle">Critical Systems</text>
+                </g>
+                <g class="colony-node colony-node-accent">
+                    <circle cx="490" cy="275" r="28"/>
+                    <g transform="translate(478 262)"><rect x="3" y="11" width="18" height="14" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4M12 17v3"/></g>
+                    <text x="490" y="323" text-anchor="middle">Sensitive Data</text>
+                </g>
+                <g class="colony-node">
+                    <circle cx="300" cy="380" r="28"/>
+                    <g transform="translate(288 367)"><path d="M2 17v-5a10 10 0 0 1 20 0v8a5 5 0 0 1-5 5h-4"/><rect x="0" y="12" width="5" height="9" rx="2"/><rect x="19" y="12" width="5" height="9" rx="2"/></g>
+                    <text x="300" y="428" text-anchor="middle">IT Support</text>
+                </g>
+            </svg>
+        </figure>
     </section>
     <section class="feature-cards" aria-label="How Antzecure helps">
         <article class="feature-card">
@@ -63,6 +114,14 @@
         cybersecurity recommendations based on your organization's
         current practices.
     </p>
+
+    <div class="plain-language-setting" id="plainLanguageSetting" hidden>
+        <label class="plain-language-toggle" for="explainTerms">
+            <input type="checkbox" id="explainTerms" checked aria-describedby="explainTermsHint">
+            <span>Explain cybersecurity terms</span>
+        </label>
+        <p id="explainTermsHint">Show brief explanations below questions. Your preference is remembered on this browser when storage is available.</p>
+    </div>
 
     <form id="organizationForm">
         <div class="assessment-layout">
