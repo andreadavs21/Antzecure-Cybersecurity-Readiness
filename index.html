@@ -434,7 +434,9 @@
 
     <!-- RESULTS -->
 
-    <section id="results" hidden>
+    <section id="results" hidden aria-labelledby="resultsTitle">
+        <p class="eyebrow">YOUR ASSESSMENT RESULTS</p>
+        <h2 id="resultsTitle">Assessment Results</h2>
 
         <details class="organization-profile" id="organizationProfile">
             <summary>Organization Profile <svg class="profile-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
@@ -442,12 +444,25 @@
         </details>
 
         <div class="results-heading">
-            <div><p class="eyebrow">YOUR ASSESSMENT RESULTS</p><h2>Cybersecurity Recommendations</h2></div>
-            <button type="button" id="downloadReport">Download PDF Report</button>
+            <div><h2>Cybersecurity Recommendations</h2></div>
         </div>
         <p>Personalized recommendations based on your organization's answers, organized by priority.</p>
         <div id="recommendationsOutput" class="recommendation-summary" aria-label="Recommendations by priority"></div>
-        <p class="report-help">Opens a print-friendly report with all recommendations and their NIST CSF 2.0 references. Choose “Print / Save as PDF”, then select “Save as PDF” in your browser.</p>
+        <section class="cross-observations" aria-labelledby="observationsTitle">
+            <h3 id="observationsTitle">Cross-Question Observations</h3>
+            <p class="observations-intro">Context across answers, separate from the priority recommendations. These observations do not mean an answer is incorrect.</p>
+            <div id="observationOutput"></div>
+        </section>
+        <section class="preparedness-resources" aria-labelledby="resourcesTitle">
+            <h2 id="resourcesTitle">Your Preparedness Resources</h2>
+            <p>Open a resource, then choose Print / Save as PDF. Complete missing contact details before printing.</p>
+            <div class="resource-grid">
+                <article class="resource-card"><h3>Cybersecurity Recommendations</h3><p>Your organization overview, prioritized recommendations, NIST references and cross-question observations.</p><button type="button" id="downloadReport">Download Recommendations PDF</button></article>
+                <article class="resource-card"><h3>Emergency Contact Card</h3><p>A one-page employee reference. Fill in missing contacts, phone numbers and backup details in the printable view.</p><button type="button" data-resource="contacts">Download Emergency Contact Card</button></article>
+                <article class="resource-card"><h3>30/60/90-Day Roadmap</h3><p>A staged action plan based on your findings, with effort and cost indicators, prerequisites and space for owners.</p><button type="button" data-resource="roadmap">Download 30/60/90-Day Roadmap</button></article>
+                <article class="resource-card"><h3>20-Minute Tabletop Exercise</h3><p>A personalized discussion scenario, timed facilitator guide and What We Learned worksheet.</p><button type="button" data-resource="tabletop">Download Tabletop Exercise</button></article>
+            </div>
+        </section>
         <p id="reportStatus" role="status"></p>
 
         <p class="disclaimer">
