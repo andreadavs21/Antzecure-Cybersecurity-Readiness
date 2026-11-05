@@ -231,7 +231,7 @@ form.addEventListener("submit", function(event) {
     // NIST-ALIGNED RECOMMENDATION ENGINE
     // ==========================================
 
-    const { recommendations, observations } = evaluateReadiness(organizationData);
+    const { recommendations } = evaluateReadiness(organizationData);
 
     // ==========================================
     // DISPLAY RECOMMENDATION SUMMARY AND RETAIN THIS SUBMITTED ASSESSMENT
@@ -241,11 +241,9 @@ form.addEventListener("submit", function(event) {
         organizationName: organizationData.organizationName,
         generatedAt: new Date(),
         answers: { ...organizationData },
-        observations: observations.map(note => ({ ...note })),
         overview: fields.map(([label, value]) => [label, value]),
         recommendations: recommendations.map(rec => ({ ...rec }))
     };
-    renderCrossQuestionObservations(observations);
     document.getElementById("organizationProfile").open = false;
     document.getElementById("reportStatus").textContent = "";
     const summary = document.getElementById("recommendationsOutput");
@@ -290,26 +288,6 @@ document.getElementById("downloadReport").addEventListener("click", () => openPr
 document.querySelectorAll("[data-resource]").forEach(button => {
     button.addEventListener("click", () => openPreparednessResource(button.dataset.resource));
 });
-
-function renderCrossQuestionObservations(observations) {
-    const output = document.getElementById("observationOutput");
-    output.replaceChildren();
-    if (!observations.length) {
-        const note = document.createElement("p");
-        note.textContent = "No cross-question observations were identified from these answers. Review your individual recommendations for next steps.";
-        output.append(note);
-    }
-    observations.forEach(observation => {
-        const card = document.createElement("article");
-        card.className = "observation-card";
-        const title = document.createElement("h4");
-        title.textContent = observation.category;
-        const message = document.createElement("p");
-        message.textContent = observation.message;
-        card.append(title, message);
-        output.append(card);
-    });
-}
 
 function openPreparednessResource(kind) {
     if (!latestAssessmentReport || !resourceTitles[kind]) return;
@@ -383,18 +361,6 @@ function openPreparednessResource(kind) {
     status.textContent = resourceTitles[kind] + " opened in a new tab. Use Print / Save as PDF to download it.";
 }
 
-function appendObservationSections({ element, report, snapshot }) {
-    if (!snapshot.observations.length) return;
-    const section = element("section", undefined, "report-observations");
-    section.append(element("h2", "Cross-question observations"));
-    snapshot.observations.forEach(note => {
-        const article = element("article", undefined, "report-recommendation");
-        article.append(element("h3", note.category), element("p", note.message), element("p", "NIST CSF 2.0: " + note.nist, "report-nist"));
-        section.append(article);
-    });
-    report.append(section);
-}
-
 function renderRecommendationsReport(context) {
     const { element, report, snapshot } = context;
     const overview = element("section", undefined, "report-overview");
@@ -426,7 +392,6 @@ function renderRecommendationsReport(context) {
         });
         report.append(group);
     });
-    appendObservationSections(context);
     report.append(element("p", "Based on the organization's self-reported answers. General cybersecurity guidance, not a professional security assessment or a claim of NIST certification or compliance.", "disclaimer"));
 }
 
@@ -1209,19 +1174,7 @@ function evaluateReadiness(organizationData) {
     );
 
 
-    const observations = [];
-    if (organizationData.securityMonitoring === "Yes" || organizationData.securityMonitoring === "Partially") {
-        if (organizationData.existingPlan === "No" || organizationData.existingPlan === "Not Sure" || organizationData.existingPlan === "Partially") {
-            observations.push({ category: "Monitoring and response readiness", message: "Your organization reports " + (organizationData.securityMonitoring === "Yes" ? "security monitoring" : "partial security monitoring") + ", but " + (organizationData.existingPlan === "No" ? "no documented incident response plan" : organizationData.existingPlan === "Partially" ? "an incomplete incident response plan" : "uncertainty about a documented incident response plan") + ". Monitoring can identify suspicious activity; employees also need clear instructions for reporting, escalating, and responding to alerts. The Incident Response Plan recommendation addresses this gap.", nist: "DE.CM / RS.MA" });
-        }
-        if (organizationData.reportingMethod === "Not Established" || !isKnownContact(organizationData.emergencyContact)) {
-            const gaps = [];
-            if (organizationData.reportingMethod === "Not Established") gaps.push("an incident reporting method is not established");
-            if (!isKnownContact(organizationData.emergencyContact)) gaps.push("the primary incident contact is not assigned or known");
-            observations.push({ category: "Alert reporting and ownership", message: "Monitoring is reported, but " + gaps.join(" and ") + ". Confirm who receives alerts and how employees escalate them. The existing contact and reporting recommendations address these needs.", nist: "DE.CM / RS.CO" });
-        }
-    }
-    return { recommendations, observations };
+    return { recommendations };
 }
 
 // Optional reading aids live outside assessment data and never enter generated reports.

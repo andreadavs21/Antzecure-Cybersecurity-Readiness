@@ -271,12 +271,6 @@ footer p { margin: 0; }
     .action-check input { display: inline-block; }
 }
 
-.cross-observations { margin-top: 28px; border-top: 1px solid var(--border); padding-top: 24px; }
-.cross-observations h3 { font-size: 18px; margin: 0 0 10px; }
-.observations-intro, #observationOutput p { color: var(--muted); font-size: 13px; }
-.observation-card { margin-top: 12px; padding: 18px 20px; border: 1px solid var(--border); border-left: 3px solid var(--navy); background: white; border-radius: 8px; }
-.observation-card h4 { margin: 0 0 8px; font-size: 15px; }
-.observation-card p { margin: 0; }
 .preparedness-resources { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
 .preparedness-resources > p { font-size: 13px; color: var(--muted); }
 .resource-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
