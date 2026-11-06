@@ -315,3 +315,27 @@ footer p { margin: 0; }
     .colony-center-label { font-size: 13px; letter-spacing: 0.8px; }
 }
 @media (prefers-reduced-motion: reduce) { .colony-pulse { animation: none; opacity: 0.18; } }
+
+/* Plain-language findings keep optional technical detail out of the main reading flow. */
+.recommendation-guidance { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 24px; }
+.guidance-card { min-width: 0; padding: 24px; border: 1px solid var(--border); border-top: 3px solid var(--gray); border-radius: 10px; background: white; overflow-wrap: anywhere; }
+.guidance-card.high { border-top-color: var(--red); }
+.guidance-card.medium { border-top-color: var(--navy); }
+.guidance-card .guidance-priority { margin: 0 0 8px; color: var(--navy); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+.guidance-card.high .guidance-priority { color: var(--red); }
+.guidance-card h3 { font-size: 20px; line-height: 1.3; margin: 0 0 14px; }
+.guidance-card p { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+.guidance-card strong { color: var(--navy); }
+.guidance-card .guidance-action { color: var(--navy); }
+.technical-reference { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 12px; font-size: 13px; }
+.technical-reference summary { color: var(--navy); cursor: pointer; padding: 5px 0; width: fit-content; }
+.technical-reference p { font-size: 12px; }
+.technical-reference strong, .technical-reference span { display: block; }
+.technical-reference span { margin-top: 5px; }
+.report-recommendation .report-guidance { margin-top: 12px; }
+.technical-appendix-item { margin: 0 0 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.technical-appendix-item h3 { margin: 0 0 8px; font-size: 16px; }
+.technical-appendix-item p { font-size: 12px; margin: 5px 0; }
+@media (max-width: 800px) { .recommendation-guidance { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .guidance-card { padding: 20px 18px; } }
+@media print { .technical-appendix { break-before: page; } .technical-appendix-item { break-inside: avoid; } }

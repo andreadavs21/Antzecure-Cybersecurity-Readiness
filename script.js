@@ -244,6 +244,7 @@ form.addEventListener("submit", function(event) {
         overview: fields.map(([label, value]) => [label, value]),
         recommendations: recommendations.map(rec => ({ ...rec }))
     };
+    renderRecommendationGuidance(recommendations, organizationData);
     document.getElementById("organizationProfile").open = false;
     document.getElementById("reportStatus").textContent = "";
     const summary = document.getElementById("recommendationsOutput");
@@ -387,11 +388,28 @@ function renderRecommendationsReport(context) {
         if (!matches.length) group.append(element("p", "No " + priority.toLowerCase() + "-priority recommendations were generated for these answers."));
         matches.forEach(rec => {
             const card = element("article", undefined, "report-recommendation " + priority.toLowerCase());
-            card.append(element("p", rec.priority + " priority", "report-priority"), element("h3", rec.category), element("p", rec.message), element("p", "NIST CSF 2.0: " + rec.nist, "report-nist"));
+            const guidance = getRecommendationGuidance(rec, snapshot.answers);
+            card.append(element("p", rec.priority + " priority", "report-priority"), element("h3", rec.category), element("p", rec.message));
+            [["Why this matters:", guidance.why], ["What you should do:", guidance.steps]].forEach(([label, text]) => {
+                const paragraph = element("p", undefined, "report-guidance");
+                paragraph.append(element("strong", label + " "), report.ownerDocument.createTextNode(text));
+                card.append(paragraph);
+            });
             group.append(card);
         });
         report.append(group);
     });
+    const appendix = element("section", undefined, "technical-appendix");
+    appendix.append(element("h2", "Appendix — Technical references"), element("p", "Existing NIST CSF 2.0 category mappings are provided for reference, not as certification or proof of compliance."));
+    snapshot.recommendations.forEach(rec => {
+        const item = element("article", undefined, "technical-appendix-item");
+        item.append(element("h3", rec.category));
+        recommendationReferences(rec).forEach(ref => {
+            item.append(element("p", "NIST CSF 2.0: " + ref.code + " — " + ref.name), element("p", ref.explanation));
+        });
+        appendix.append(item);
+    });
+    report.append(appendix);
     report.append(element("p", "Based on the organization's self-reported answers. General cybersecurity guidance, not a professional security assessment or a claim of NIST certification or compliance.", "disclaimer"));
 }
 
@@ -1224,3 +1242,88 @@ function evaluateReadiness(organizationData) {
         try { localStorage.setItem(preferenceKey, toggle.checked ? "on" : "off"); } catch { /* The toggle still works for this page. */ }
     });
 })();
+
+// Presentation guidance supplements existing findings; it never changes rules, priorities or mappings.
+// Category names follow the NIST CSF 2.0 Core (NIST CSWP 29).
+const technicalCategories = {
+    "GV.RR": ["Roles, Responsibilities, and Authorities", "Decide who is responsible for cybersecurity decisions and work."],
+    "ID.AM": ["Asset Management", "Understand the information, systems and services the organization relies on."],
+    "PR.DS": ["Data Security", "Protect information against loss, damage and unauthorized access."],
+    "RC.RP": ["Incident Recovery Plan Execution", "Carry out recovery activities and check that systems and information are restored safely."],
+    "PR.AA": ["Identity Management, Authentication, and Access Control", "Check who is signing in and limit access to the people who need it."],
+    "RS.MA": ["Incident Management", "Manage the response to a detected cybersecurity incident."],
+    "PR.AT": ["Awareness and Training", "Help people understand cybersecurity risks and their responsibilities."],
+    "RS.CO": ["Incident Response Reporting and Communication", "Report incidents and coordinate information with the people who need it."],
+    "RS.AN": ["Incident Analysis", "Investigate an incident to understand what happened and its impact."],
+    "RS.MI": ["Incident Mitigation", "Contain an incident and limit its effects."],
+    "DE.CM": ["Continuous Monitoring", "Watch systems and activities for signs of potential cybersecurity problems."],
+    "ID.IM": ["Improvement", "Use reviews, tests and experience to improve cybersecurity practices."],
+    "RC.CO": ["Incident Recovery Communication", "Keep affected people informed while recovery work takes place."]
+};
+
+const recommendationGuidance = {
+    "Response Coordination": ["When responsibilities are unclear, important decisions can be delayed while a security problem spreads.", "Write down who makes decisions, who contacts technical help, and who updates staff; keep a copy available if email stops working."],
+    "Critical Systems": ["Losing access to an essential tool can stop payments, services or day-to-day work.", "List the tools staff need most, who manages each one, and an approved way to keep essential work going if a tool is unavailable."],
+    "IT Support": ["Without a clear source of technical help, a small problem may take longer to investigate and contain.", "Agree who will provide technical assistance, record their contact details, and confirm how to reach them during an urgent incident."],
+    "Emergency Contact": ["Staff may lose valuable time if they do not know whom to tell about a suspicious email, lost device or account problem.", "Confirm a primary contact and how to reach them, then share those details with staff in a place they can access without email."],
+    "Data Backups": ["A lost laptop, damaged file or locked account can permanently remove information if there is no usable separate copy.", "List the information that must be protected, agree who owns the backup process, and ask a qualified responder how to keep separate protected copies."],
+    "Alternate Contact": ["An incident can go unreported if the only designated contact is away or cannot be reached.", "Agree on a backup contact, confirm that person accepts the role, and tell staff when and how to contact them."],
+    "Incident Reporting": ["A warning can be missed when staff use different or unreliable ways to report a problem.", "Choose a reporting method and an alternative if that method is unavailable, then give staff a short example of what to report and to whom."],
+    "Backup Testing": ["A saved copy may be incomplete or unusable, and discovering that during an emergency can delay recovery.", "Ask a qualified technical responder to restore a small sample into a safe separate location, confirm the files open, and record the date and result."],
+    "Authentication": ["A stolen password can let someone read email, access records or misuse financial accounts.", "Start with email and financial accounts; ask the account administrator or provider to enable a second sign-in check and explain secure account-recovery options."],
+    "Incident Response Plan": ["Without an agreed response, staff may miss important steps or take actions that make the situation harder to resolve.", "Keep a short written guide covering whom to contact, how to report a problem, who approves protective actions, and how essential work will continue."],
+    "Employee Awareness": ["Suspicious activity can go unnoticed when staff do not recognize common warning signs.", "Show staff examples of unexpected payment requests and sign-in alerts, and practice reporting them without opening suspicious links."],
+    "Sensitive Data": ["Information about customers, staff or finances can harm people and the organization if it is lost or shared without permission.", "Ask the people responsible for customer, payroll and financial tools what information is held, where it is stored, and who can access or share it."],
+    "Device Isolation": ["A compromised device may put other computers or shared files at risk if the problem spreads.", "Ask a qualified responder to document when and how a device should be disconnected, who can approve it, and what employees should avoid doing."],
+    "Employee Training": ["Staff are less likely to make a costly mistake when they have practiced recognizing and reporting common risks.", "Use a short team session with a realistic example, explain the reporting contact, and record who attended and when to repeat the session."],
+    "Security Monitoring": ["Unusual sign-ins or harmful activity may continue longer if nobody receives and reviews warning signs.", "Ask a qualified responder which important accounts and devices send alerts, who reviews those alerts, and how urgent warnings are escalated."],
+    "Incident Severity Assessment": ["Staff can waste time or miss a serious problem if there is no shared way to decide how urgent it is.", "Agree on simple examples, such as one affected account versus unavailable essential services, and document who decides when more help is needed."],
+    "Incident Response Exercises": ["Unclear roles and missing contact details are easier to fix before a real emergency happens.", "Set aside 20 minutes to discuss a fictional security problem, record unclear decisions, and assign an owner and target date to each improvement."],
+    "Recovery Procedures": ["Even after a problem is contained, missing recovery instructions can leave essential work unavailable for longer.", "List the order in which important tools should be restored, who provides technical help, and who checks they are safe before staff use them again."],
+    "Recovery Communication": ["Staff and affected people may make poor decisions if they do not know what is available or when another update is expected.", "Choose who provides recovery updates, agree which audiences need them, and use an approved communication method that still works during an outage."]
+};
+
+function getRecommendationGuidance(rec, answers) {
+    const [why, defaultSteps] = recommendationGuidance[rec.category];
+    let steps = defaultSteps;
+    if (rec.category === "Data Backups" && answers.backups === "Not Sure") steps = "Ask the people who manage your files and applications whether backups exist, where the latest copies are kept, and who checks that the process is working.";
+    if (rec.category === "Data Backups" && answers.backups === "Yes") steps = "Record who checks backup jobs, where protected copies are kept, and when the backup arrangements will next be reviewed.";
+    if (rec.category === "Authentication" && answers.mfa === "Not Sure") steps = "List important accounts and ask each administrator or provider which already use a second sign-in check; record any gaps before deciding what to enable.";
+    if (rec.category === "Incident Response Plan" && answers.existingPlan === "Not Sure") steps = "Ask the manager or technical provider whether a written response guide exists, check where staff can find it, and identify missing instructions together.";
+    if (rec.priority === "Low") steps = "Keep this practice in place: " + (rec.category === "Backup Testing" ? "schedule the next safe sample restoration with your technical responder and record what was recovered." : rec.category === "Data Backups" ? "confirm backup checks still have an owner and review the arrangements when important files or systems change." : rec.category === "Incident Response Exercises" ? "schedule another discussion exercise and follow up on the actions from the last one." : "agree who owns it, review the current arrangements together, and set a date to check them again.");
+    return { why, steps };
+}
+
+function recommendationReferences(rec) {
+    return rec.nist.split("/").map(code => code.trim()).map(code => ({ code, name: technicalCategories[code][0], explanation: technicalCategories[code][1] }));
+}
+
+function renderRecommendationGuidance(recommendations, answers) {
+    const output = document.getElementById("recommendationGuidance");
+    output.replaceChildren();
+    const create = (tag, text, className) => {
+        const node = document.createElement(tag);
+        if (text !== undefined) node.textContent = text;
+        if (className) node.className = className;
+        return node;
+    };
+    recommendations.forEach(rec => {
+        const guidance = getRecommendationGuidance(rec, answers);
+        const card = create("article", undefined, "guidance-card " + rec.priority.toLowerCase());
+        card.append(create("p", rec.priority + " priority", "guidance-priority"), create("h3", rec.category), create("p", rec.message, "guidance-action"));
+        [["Why this matters:", guidance.why], ["What you should do:", guidance.steps]].forEach(([label, text]) => {
+            const paragraph = create("p");
+            paragraph.append(create("strong", label + " "), document.createTextNode(text));
+            card.append(paragraph);
+        });
+        const details = create("details", undefined, "technical-reference");
+        details.append(create("summary", "Technical reference"));
+        recommendationReferences(rec).forEach(ref => {
+            const item = create("p");
+            item.append(create("strong", "NIST CSF 2.0: " + ref.code + " — " + ref.name), create("span", ref.explanation));
+            details.append(item);
+        });
+        card.append(details);
+        output.append(card);
+    });
+}
