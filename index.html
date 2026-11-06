@@ -503,17 +503,19 @@
         </details>
 
         <div class="results-heading">
-            <div><h2>Cybersecurity Recommendations</h2></div>
+            <div><h2>Cybersecurity Readiness Summary</h2></div>
         </div>
         <p>Personalized recommendations based on your organization's answers, organized by priority.</p>
         <div id="recommendationsOutput" class="recommendation-summary" aria-label="Recommendations by priority"></div>
-        <div id="recommendationGuidance" class="recommendation-guidance" aria-label="Personalized recommendation guidance"></div>
+        <article class="resource-card personalized-report" aria-labelledby="reportCardTitle">
+            <div><h3 id="reportCardTitle">Your Personalized Recommendations Report</h3><p>Download your organization's cybersecurity recommendations, including practical steps to improve your security readiness.</p></div>
+            <button type="button" id="downloadReport"><svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></svg>Download Recommendations PDF</button>
+        </article>
         <section class="preparedness-resources" aria-labelledby="resourcesTitle">
             <h2 id="resourcesTitle">Your Preparedness Resources</h2>
             <p>Open a resource, then choose Print / Save as PDF. Complete missing contact details before printing.</p>
             <div class="resource-grid">
-                <article class="resource-card"><h3>Cybersecurity Recommendations</h3><p>Your organization overview, prioritized recommendations, and NIST references.</p><button type="button" id="downloadReport">Download Recommendations PDF</button></article>
-                <article class="resource-card"><h3>Emergency Contact Card</h3><p>A one-page employee reference. Fill in missing contacts, phone numbers and backup details in the printable view.</p><button type="button" data-resource="contacts">Download Emergency Contact Card</button></article>
+                <article class="resource-card resource-card-info"><h3>Emergency Contact Card</h3><p>A one-page employee reference. Fill in missing contacts, phone numbers and backup details in the printable view.</p><button type="button" data-resource="contacts">Download Emergency Contact Card</button></article>
                 <article class="resource-card resource-card-info"><h3>20-Minute Tabletop Exercise</h3><p>A personalized discussion scenario, timed facilitator guide, and What We Learned worksheet.</p></article>
             </div>
         </section>
