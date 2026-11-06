@@ -280,7 +280,7 @@ const resourceTitles = {
     recommendations: "Cybersecurity Readiness Report",
     contacts: "Emergency Cybersecurity Contact Card",
     roadmap: "30/60/90-Day Cybersecurity Action Roadmap",
-    tabletop: "20-Minute Cybersecurity Tabletop Exercise"
+    tabletop: "Practice Your Response — 20-Minute Exercise"
 };
 
 document.getElementById("downloadReport").addEventListener("click", () => openPreparednessResource("recommendations"));
@@ -548,42 +548,65 @@ function renderRoadmap(context) {
 
 function buildTabletopScenario(answers) {
     const scenarios = {
-        "Email": "An employee receives a suspicious email and their email account may be compromised. Consider how loss of email access could interrupt communication.",
-        "Financial Systems": "Suspicious financial transactions are detected. Discuss how to report them and protect financial operations while qualified responders investigate.",
-        "Customer Records": "Unauthorized access to customer records is suspected. Discuss how to protect the records and coordinate investigation without assuming exposure has been confirmed.",
-        "Shared Files": "Employees discover important shared files are inaccessible. Discuss the impact on daily work and how to assess possible causes with technical assistance.",
-        "Website": "The organization's website appears to have been compromised. Discuss how to verify the report and communicate while technical responders assess the situation."
+        "Email": "An employee receives an unexpected email asking them to sign in. They then notice that they cannot access their email account. Discuss what you would do if someone else might have accessed the account.",
+        "Financial Systems": "Someone notices a payment they do not recognize in the organization's financial system. They are unsure whether it was approved, and access to the system becomes unavailable. Discuss how to report and check the problem.",
+        "Customer Records": "A person who normally uses the customer records system cannot open it and sees an unfamiliar sign-in notice. Discuss how to respond to possible access by someone who should not have it; do not assume information was exposed.",
+        "Shared Files": "An employee tries to open important shared files, but the files are unavailable. They do not yet know why. Discuss how your team would report the problem and keep essential work going.",
+        "Website": "Someone notices that the organization's website is showing an unexpected page instead of its normal content. Discuss how your team would check the report and respond while the website is unavailable."
     };
-    return scenarios[answers.criticalSystems] || "Generic scenario — no specific critical system was identified in the assessment. An employee notices suspicious activity affecting an important work application. Select an example together for this discussion; this is not a claim about your actual systems.";
+    return scenarios[answers.criticalSystems] || "Generic practice scenario — the assessment did not name a specific critical system. Imagine that an important work application is unavailable and an employee is unsure why. Choose an example together for this discussion; no particular application is assumed to exist in your organization.";
+}
+
+function buildExerciseComplication(answers) {
+    const complications = {
+        "Email": "The email account is still unavailable, and a colleague asks how to send an urgent update.",
+        "Financial Systems": "The financial system is still unavailable, and someone needs to know how an important payment will be handled.",
+        "Customer Records": "The records system is still unavailable, and someone asks whether any information was shared without permission; the team does not yet know.",
+        "Shared Files": "The shared files are still unavailable, and an employee needs information from them to finish an important task.",
+        "Website": "The website is still unavailable, and someone asks whether normal services are continuing."
+    };
+    const complication = complications[answers.criticalSystems] || "The work application remains unavailable, and someone asks for an update on an important task.";
+    return complication + (answers.reportingMethod === "Email" ? " The usual email reporting route may also be affected; discuss which approved alternative you could use." : " Discuss how to give accurate updates without guessing when service will return.");
 }
 
 function renderTabletop(context) {
     const { element, report, snapshot } = context;
     const a = snapshot.answers;
     const scenario = element("section", undefined, "tabletop-scenario");
-    scenario.append(element("h2", "Scenario sheet"), element("p", buildTabletopScenario(a)));
-    scenario.append(element("p", "Discussion only. Do not shut down systems, change passwords, run malware, or modify production systems as part of this exercise.", "exercise-safety"));
+    scenario.append(element("h2", "Your practice scenario"), element("p", "This is a fictional practice situation, not a report of an actual incident."), element("p", buildTabletopScenario(a)));
+    scenario.append(element("p", "Talk through your decisions only. Do not turn off real systems, change passwords, open suspicious links, or change work applications during this exercise. No special software or technical experience is needed.", "exercise-safety"));
     const details = element("dl", undefined, "exercise-context");
-    const backupText = a.backups === "No" ? "No backups reported. Discuss immediate continuity options and the need to establish backups; do not assume restoration is available." : a.backups === "Not Sure" ? "Backup availability is unverified. Identify who will check availability and ownership; do not assume backups can be restored." : "Backups reported. Restoration testing: " + a.backupTesting + ". Discuss who can authorize and verify a safe restoration.";
-    [["Selected critical system", a.criticalSystems], ["IT support arrangement", a.itSupport], ["Primary incident contact", knownResourceValue(a.emergencyContact) || "To be completed"], ["Reporting method", a.reportingMethod], ["Backup status", backupText]].forEach(([label,value]) => { details.append(element("dt",label),element("dd",value)); });
+    const backupText = a.backups === "No" ? "No backups reported: do not assume that separate copies of files are available to restore." : a.backups === "Not Sure" ? "Backup availability is unknown: identify who will check whether separate copies of files exist." : "Backups reported: separate copies of important files are available according to the assessment; restoration testing was answered “" + a.backupTesting + "”. Discuss who would check that copies can actually be used.";
+    const supportText = a.itSupport === "No IT Support" ? "No dedicated technology support reported. Discuss who can arrange qualified help; do not assume a provider is already available." : a.itSupport === "External IT Provider" ? "An outside technology-support provider is reported. Confirm how to reach the provider; no provider name or phone number was supplied in the assessment." : a.itSupport === "Internal IT Team" ? "An internal technology-support team is reported. Discuss who from that team should be contacted." : "The Office Manager is reported as responsible for technology support. Discuss when qualified technical help should be arranged.";
+    const planText = a.existingPlan === "Yes" ? "A written incident response plan is reported: bring the guide describing what to do during a security problem." : a.existingPlan === "No" ? "No written incident response plan is reported: record unclear decisions as improvements rather than assuming instructions exist." : a.existingPlan === "Partially" ? "A written response guide is partly complete: use available instructions and note what is missing." : "It is not known whether a written response guide exists: identify who will check.";
+    const reportingText = a.reportingMethod === "Not Established" ? "No reporting method has been established. Discuss how to agree one and record this as an improvement." : a.reportingMethod === "Other" ? "Other reporting method selected, without details. Ask the group to identify the actual method before relying on it." : a.reportingMethod;
+    [["Important system selected", a.criticalSystems], ["Technology support", supportText], ["Emergency contact", knownResourceValue(a.emergencyContact) || "Not assigned or unknown — agree who should be contacted."], ["How to report the problem", reportingText], ["Backups — separate copies of files", backupText], ["Written response guide", planText]].forEach(([label, value]) => {
+        const item = element("div");
+        item.append(element("dt", label), element("dd", value));
+        details.append(item);
+    });
     scenario.append(details);
+    if (a.sensitiveData === "Yes" || a.sensitiveData === "Not Sure") scenario.append(element("p", a.sensitiveData === "Yes" ? "Sensitive information is reported. Use made-up examples in this exercise; do not read out or copy real personal, customer, employee, or financial records." : "The assessment did not confirm whether sensitive information is held. Note who will check; do not assume that no personal or financial information is involved.", "exercise-privacy"));
     const facilitator = element("section", undefined, "facilitator-guide");
-    facilitator.append(element("h2", "Facilitator guide — 20 minutes"), element("p", "Choose a facilitator, a note-taker and participants who understand daily operations. Read the fictional scenario aloud. Ask participants to describe decisions, not perform technical actions. Record unknowns as follow-up tasks. Use only approved real-world response procedures if an actual incident occurs."));
+    facilitator.append(element("h2", "Simple facilitator guide — 20 minutes"), element("p", "Choose one person to guide the discussion and another to take notes. Read the scenario aloud, use a timer, and ask everyone for ideas. A critical system means a tool your organization needs for important work. Technology support means the people who help with computers and accounts. Record unknown information instead of guessing, and follow the four steps below."));
     const parts = [
-        ["Part 1 — Scenario Introduction (3 minutes)", ["Read the scenario. What daily activities could be affected? Which facts are known and which need verification?"]],
-        ["Part 2 — Initial Response (5 minutes)", ["Who should employees contact first?", "How would the organization confirm that something suspicious happened?", "What should employees avoid doing?", "When should the IT provider or designated technical responder be contacted?"]],
-        ["Part 3 — Containment and Communication (5 minutes)", ["Who has authority to make decisions?", "How would affected systems be protected under approved instructions?", "Who needs to be informed?", "How would normal operations continue?"]],
-        ["Part 4 — Recovery (4 minutes)", ["How would the organization restore affected systems?", "Are backups available, who owns them, and have they been tested?", "Who would confirm that systems are safe to use again?"]],
-        ["Part 5 — Lessons Learned (3 minutes)", ["What worked, what was unclear, and what needs improvement? Agree on follow-up owners and target dates."]]
+        { title: "Step 1 — Understand the Problem (3 minutes)", questions: ["What happened?", "Which important system is affected?", "Who noticed the problem in this practice scenario?"] },
+        { title: "Step 2 — Who Do We Contact? (5 minutes)", questions: ["Who should employees notify, using the contact details recorded above?", "How should the problem be reported?", a.itSupport === "No IT Support" ? "With no dedicated technology support, who could arrange qualified help and when should they do so?" : "When should the technology-support provider or designated technical responder be contacted?"] },
+        { title: "Step 3 — What Happens Next? (7 minutes)", complication: buildExerciseComplication(a), questions: ["What if the system stays unavailable?", "How can essential operations continue using approved alternatives?", "Who should communicate updates, and what facts can they confirm?"] },
+        { title: "Step 4 — What Did We Learn? (5 minutes)", questions: ["What went well?", "What was confusing?", "What needs improvement?", "Who will be responsible for each improvement?"] }
     ];
-    parts.forEach(([title, questions]) => {
-        const part = element("article", undefined, "exercise-part");
-        const list = element("ul"); questions.forEach(question => list.append(element("li",question)));
-        part.append(element("h3",title),list); facilitator.append(part);
+    parts.forEach(part => {
+        const article = element("article", undefined, "exercise-part");
+        article.append(element("h3", part.title));
+        if (part.complication) article.append(element("p", "New development: " + part.complication, "exercise-complication"));
+        const list = element("ul");
+        part.questions.forEach(question => list.append(element("li", question)));
+        article.append(list);
+        facilitator.append(article);
     });
     const worksheet = element("section", undefined, "lessons-worksheet");
-    worksheet.append(element("h2", "What We Learned"), element("p", "Organization: " + snapshot.organizationName));
-    ["What went well?", "What problems or gaps were identified?", "Which decisions were unclear?", "What actions should be taken next?", "Who is responsible?", "Target completion date?"].forEach(label => {
+    worksheet.append(element("h2", "What We Learned"), element("p", "Organization: " + snapshot.organizationName), element("p", "Use the space below to record your discussion and agree on follow-up work."));
+    ["What went well?", "What was confusing?", "What needs improvement?", "What action will we take next?", "Who will be responsible?", "Target completion date"].forEach(label => {
         const block = element("div", undefined, "worksheet-answer");
         block.append(element("h3", label), element("div", undefined, "writing-lines"));
         worksheet.append(block);
