@@ -244,7 +244,6 @@ form.addEventListener("submit", function(event) {
         overview: fields.map(([label, value]) => [label, value]),
         recommendations: recommendations.map(rec => ({ ...rec }))
     };
-    renderRecommendationGuidance(recommendations, organizationData);
     document.getElementById("organizationProfile").open = false;
     document.getElementById("reportStatus").textContent = "";
     const summary = document.getElementById("recommendationsOutput");
@@ -1296,34 +1295,4 @@ function getRecommendationGuidance(rec, answers) {
 
 function recommendationReferences(rec) {
     return rec.nist.split("/").map(code => code.trim()).map(code => ({ code, name: technicalCategories[code][0], explanation: technicalCategories[code][1] }));
-}
-
-function renderRecommendationGuidance(recommendations, answers) {
-    const output = document.getElementById("recommendationGuidance");
-    output.replaceChildren();
-    const create = (tag, text, className) => {
-        const node = document.createElement(tag);
-        if (text !== undefined) node.textContent = text;
-        if (className) node.className = className;
-        return node;
-    };
-    recommendations.forEach(rec => {
-        const guidance = getRecommendationGuidance(rec, answers);
-        const card = create("article", undefined, "guidance-card " + rec.priority.toLowerCase());
-        card.append(create("p", rec.priority + " priority", "guidance-priority"), create("h3", rec.category), create("p", rec.message, "guidance-action"));
-        [["Why this matters:", guidance.why], ["What you should do:", guidance.steps]].forEach(([label, text]) => {
-            const paragraph = create("p");
-            paragraph.append(create("strong", label + " "), document.createTextNode(text));
-            card.append(paragraph);
-        });
-        const details = create("details", undefined, "technical-reference");
-        details.append(create("summary", "Technical reference"));
-        recommendationReferences(rec).forEach(ref => {
-            const item = create("p");
-            item.append(create("strong", "NIST CSF 2.0: " + ref.code + " — " + ref.name), create("span", ref.explanation));
-            details.append(item);
-        });
-        card.append(details);
-        output.append(card);
-    });
 }
