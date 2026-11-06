@@ -314,12 +314,8 @@ footer p { margin: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .colony-pulse { animation: none; opacity: 0.18; } }
 
-/* Plain-language report content and its technical appendix. */
+/* Plain-language report content. */
 .report-recommendation .report-guidance { margin-top: 12px; }
-.technical-appendix-item { margin: 0 0 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-.technical-appendix-item h3 { margin: 0 0 8px; font-size: 16px; }
-.technical-appendix-item p { font-size: 12px; margin: 5px 0; }
-@media print { .technical-appendix { break-before: page; } .technical-appendix-item { break-inside: avoid; } }
 
 /* A single report entry point replaces on-page recommendation details. */
 .personalized-report { margin-top: 24px; flex-direction: row; align-items: center; justify-content: space-between; gap: 28px; }
@@ -330,4 +326,21 @@ footer p { margin: 0; }
 @media (max-width: 800px) {
     .personalized-report { flex-direction: column; align-items: stretch; gap: 20px; }
     .personalized-report button { width: 100%; }
+}
+
+/* Native disclosure on screen, compact static references in print. */
+.report-technical-reference { margin-top: 16px; border: 1px solid var(--border); border-radius: 6px; background: #f7f8fa; }
+.report-technical-reference summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 12px; color: var(--navy); font-size: 12px; font-weight: 600; list-style: none; cursor: pointer; }
+.report-technical-reference summary::-webkit-details-marker { display: none; }
+.reference-chevron { display: inline-block; color: var(--muted); font-size: 21px; line-height: 1; transform: rotate(90deg); }
+.report-technical-reference[open] .reference-chevron { transform: rotate(270deg); }
+.report-reference-content { padding: 0 12px 12px; }
+.report-reference-content p { margin-top: 10px; font-size: 11px; line-height: 1.6; }
+.report-reference-content strong, .report-reference-content span { display: block; }
+.report-reference-content span { margin-top: 4px; color: var(--muted); }
+.technical-reference-print { display: none; }
+@media print {
+    .report-technical-reference { display: none !important; }
+    .technical-reference-print { display: block; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; }
+    .reference-print-label { font-weight: 700; }
 }

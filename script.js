@@ -394,21 +394,28 @@ function renderRecommendationsReport(context) {
                 paragraph.append(element("strong", label + " "), report.ownerDocument.createTextNode(text));
                 card.append(paragraph);
             });
+            const details = element("details", undefined, "report-technical-reference");
+            const toggle = element("summary");
+            const chevron = element("span", "›", "reference-chevron");
+            chevron.setAttribute("aria-hidden", "true");
+            toggle.append(element("span", "Technical reference"), chevron);
+            const references = element("div", undefined, "report-reference-content");
+            recommendationReferences(rec).forEach(ref => {
+                const item = element("p");
+                item.append(element("strong", "NIST CSF 2.0: " + ref.code + " — " + ref.name), element("span", ref.explanation));
+                references.append(item);
+            });
+            details.append(toggle, references);
+            // A static print copy works even when native details are collapsed.
+            // Print only one copy; PDF readers are not expected to support HTML controls.
+            const printableReferences = references.cloneNode(true);
+            printableReferences.classList.add("technical-reference-print");
+            printableReferences.prepend(element("p", "Technical reference", "reference-print-label"));
+            card.append(details, printableReferences);
             group.append(card);
         });
         report.append(group);
     });
-    const appendix = element("section", undefined, "technical-appendix");
-    appendix.append(element("h2", "Appendix — Technical references"), element("p", "Existing NIST CSF 2.0 category mappings are provided for reference, not as certification or proof of compliance."));
-    snapshot.recommendations.forEach(rec => {
-        const item = element("article", undefined, "technical-appendix-item");
-        item.append(element("h3", rec.category));
-        recommendationReferences(rec).forEach(ref => {
-            item.append(element("p", "NIST CSF 2.0: " + ref.code + " — " + ref.name), element("p", ref.explanation));
-        });
-        appendix.append(item);
-    });
-    report.append(appendix);
     report.append(element("p", "Based on the organization's self-reported answers. General cybersecurity guidance, not a professional security assessment or a claim of NIST certification or compliance.", "disclaimer"));
 }
 
