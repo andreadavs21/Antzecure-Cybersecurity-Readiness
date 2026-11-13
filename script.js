@@ -258,6 +258,7 @@ form.addEventListener("submit", function(event) {
         card.append(count, label);
         summary.append(card);
     });
+    renderFirstSteps(recommendations, organizationData);
 
 
     // ==========================================
@@ -275,6 +276,39 @@ form.addEventListener("submit", function(event) {
 
 // Reports use a snapshot of the last valid submission, never unsubmitted field edits.
 let latestAssessmentReport = null;
+
+// Reuse the engine's priority order and the report's answer-aware guidance.
+// Deduplicate only this preview; keep the original findings and counts intact.
+function renderFirstSteps(recommendations, answers) {
+    const list = document.getElementById("firstStepsList");
+    const seen = new Set();
+    const selected = recommendations.filter(rec => {
+        const key = rec.category.trim().toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    }).slice(0, 3);
+
+    list.replaceChildren();
+    selected.forEach((rec, index) => {
+        const card = document.createElement("li");
+        card.className = "first-step-card";
+        const number = document.createElement("span");
+        number.className = "first-step-number";
+        number.textContent = String(index + 1).padStart(2, "0");
+        number.setAttribute("aria-hidden", "true");
+        const priority = document.createElement("p");
+        priority.className = "first-step-priority";
+        priority.textContent = rec.priority + " priority";
+        const title = document.createElement("h4");
+        title.textContent = rec.category;
+        const explanation = document.createElement("p");
+        explanation.textContent = getRecommendationGuidance(rec, answers).steps;
+        card.append(number, priority, title, explanation);
+        list.append(card);
+    });
+    document.getElementById("firstSteps").hidden = selected.length === 0;
+}
 
 const resourceTitles = {
     recommendations: "Cybersecurity Readiness Report",
