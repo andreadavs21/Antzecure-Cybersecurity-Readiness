@@ -317,7 +317,20 @@ footer p { margin: 0; }
 /* Plain-language report content. */
 .report-recommendation .report-guidance { margin-top: 12px; }
 
-/* A single report entry point replaces on-page recommendation details. */
+/* A short preview uses the same recommendations and guidance as the report. */
+.first-steps { margin-top: 28px; }
+.first-steps h3 { margin: 0 0 8px; font-size: 20px; }
+.first-steps > p { margin: 0 0 16px; color: var(--muted); }
+.first-steps-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; list-style: none; padding: 0; margin: 0; }
+.first-step-card { min-width: 0; padding: 22px; background: white; border: 1px solid var(--border); border-radius: 10px; overflow-wrap: anywhere; }
+.first-step-number { color: var(--red); font-size: 28px; font-weight: 700; }
+.first-step-card .first-step-priority { margin: 8px 0; color: var(--navy); font-size: 12px; font-weight: 700; }
+.first-step-card h4 { margin: 0 0 10px; font-size: 17px; }
+.first-step-card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+@media (max-width: 800px) {
+    .first-steps-list { grid-template-columns: 1fr; }
+}
+
 .personalized-report { margin-top: 24px; flex-direction: row; align-items: center; justify-content: space-between; gap: 28px; }
 .personalized-report > div { min-width: 0; }
 .personalized-report h3 { margin-bottom: 10px; }
