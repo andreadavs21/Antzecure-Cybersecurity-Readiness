@@ -311,6 +311,7 @@ function renderFirstSteps(recommendations, answers) {
 }
 
 const resourceTitles = {
+    incidentPlan: "Your Incident Response Plan",
     recommendations: "Cybersecurity Readiness Report",
     contacts: "Emergency Cybersecurity Contact Card",
     roadmap: "30/60/90-Day Cybersecurity Action Roadmap",
@@ -381,6 +382,7 @@ function openPreparednessResource(kind) {
     if (kind === "contacts") renderContactCard(context);
     if (kind === "roadmap") renderRoadmap(context);
     if (kind === "tabletop") renderTabletop(context);
+    if (kind === "incidentPlan") renderIncidentPlan(context);
     printButton.addEventListener("click", () => { syncPrintableFields(reportDocument); reportWindow.print(); });
     reportWindow.addEventListener("beforeprint", () => syncPrintableFields(reportDocument));
     toolbar.append(printHelp, printButton);
@@ -1359,4 +1361,151 @@ function getRecommendationGuidance(rec, answers) {
 
 function recommendationReferences(rec) {
     return rec.nist.split("/").map(code => code.trim()).map(code => ({ code, name: technicalCategories[code][0], explanation: technicalCategories[code][1] }));
+}
+
+// The plan consumes the submitted snapshot and existing findings, not new assessment rules.
+function renderIncidentPlan(context) {
+    const { element: el, report, snapshot } = context;
+    const a = snapshot.answers;
+    const contact = knownResourceValue(a.emergencyContact);
+    const system = knownResourceValue(a.criticalSystems) || "Critical system not confirmed — identify before an emergency";
+    const reported = value => value || "Not confirmed";
+    const backup = a.backups === "Yes"
+        ? "Backups reported available. A qualified responder must verify that copies are safe and usable before restoring."
+        : a.backups === "No" ? "No backups reported. Do not plan to restore from backups that do not exist. Arrange qualified help to assess other recovery options; creating protected backups is a preparation gap."
+        : "Backup availability is unconfirmed. Ask a qualified responder to check whether safe copies exist; do not assume restoration is possible.";
+    const technical = a.itSupport === "No IT Support"
+        ? "No dedicated IT support reported. Arrange qualified technical assistance; no responder is assumed available."
+        : a.itSupport === "External IT Provider" ? "External IT provider reported; confirm the provider, named responder and urgent phone number."
+        : a.itSupport === "Internal IT Team" ? "Internal IT team reported; confirm the named responder and urgent phone number."
+        : "IT responsibility reported: " + reported(a.itSupport) + ". Confirm qualified technical assistance; this answer does not establish technical expertise.";
+    const date = new Date(snapshot.generatedAt);
+    const review = new Date(date);
+    // Clamp leap-day anniversaries to the last day of February.
+    review.setFullYear(date.getFullYear() + 1, date.getMonth(), 1);
+    review.setDate(Math.min(date.getDate(), new Date(review.getFullYear(), review.getMonth() + 1, 0).getDate()));
+    const fmt = d => new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(d);
+    const text = (parent, value, cls) => parent.append(el("p", value, cls));
+    function list(parent, items, checks = false) {
+        const node = el("ul", undefined, checks ? "plan-checklist" : "");
+        items.forEach(value => node.append(el("li", value)));
+        parent.append(node);
+    }
+    function section(page, number, title) {
+        const node = el("section", undefined, "plan-section");
+        node.dataset.planSection = number;
+        node.append(el("h2", number + ". " + title)); page.append(node); return node;
+    }
+    function table(parent, headings, rows, cls = "") {
+        const node = el("table", undefined, "plan-table " + cls);
+        const head = el("thead"), tr = el("tr");
+        headings.forEach(value => { const th = el("th", value); th.scope = "col"; tr.append(th); });
+        head.append(tr); node.append(head);
+        const body = el("tbody");
+        rows.forEach(row => { const tr = el("tr"); row.forEach(value => tr.append(el("td", value))); body.append(tr); });
+        node.append(body); parent.append(node);
+    }
+    const pages = Array.from({ length: 5 }, (_, i) => {
+        const page = el("article", undefined, "plan-sheet");
+        const head = el("div", undefined, "plan-running-head");
+        head.append(el("strong", "ANTZECURE · INCIDENT RESPONSE"), el("span", snapshot.organizationName));
+        page.append(head);
+        const body = el("div", undefined, "plan-sheet-body"); page.append(body);
+        const footer = el("footer", "Version 1.0 · " + snapshot.organizationName + " · Page " + (i + 1) + " of 5", "plan-footer");
+        page.append(footer); return { page, body };
+    });
+    // Replace only this resource's generic report heading; each printed sheet has its own header.
+    report.replaceChildren(...pages.map(p => p.page));
+    let s = section(pages[0].body, 1, "Your Plan and Items to Complete");
+    text(s, snapshot.organizationName, "plan-org");
+    text(s, "DURING AN INCIDENT: turn to page 3 for the first-hour checklist. Contacts and reporting: page 2.", "plan-emergency-guide");
+    text(s, "STARTER PLAN — requires organizational review and approval. Version 1.0 · Generated " + fmt(date) + " · Next review " + fmt(review));
+    text(s, "Plan owner: __________________  Approval / date: __________________");
+    text(s, "Assessment reports an existing response plan: " + reported(a.existingPlan) + ". Reconcile this starter with any approved procedures before use.");
+    s.append(el("h3", "Items to Complete Before an Emergency"));
+    const prep = snapshot.recommendations.filter(r => r.priority === "High").map(r => r.category + ": " + r.message);
+    if (!contact && !snapshot.recommendations.some(r => r.priority === "High" && r.category === "Emergency Contact")) prep.push("Assign and share a primary emergency reporting contact.");
+    prep.push("Confirm the plan owner, coordinator and decision approver; record names and phone numbers on page 2.");
+    if (a.alternateContact !== "Yes") prep.push("Confirm an alternate emergency contact (assessment: " + reported(a.alternateContact) + ").");
+    else prep.push("Record the name and phone number of the reported alternate contact.");
+    prep.push(a.itSupport === "External IT Provider" ? "Record the external IT provider's urgent phone number." : "Record the confirmed technical responder's urgent phone number.");
+    if (a.backups === "Yes") prep.push("Record backup locations and the person responsible; the assessment does not collect these details.");
+    list(s, [...new Set(prep)], true);
+    s = section(pages[0].body, 2, "Purpose and What Counts as an Incident");
+    text(s, "Use this plan to report a suspected security problem, get authorized help, limit harm and restore essential work. During an incident, start with page 3. Keep a printed copy somewhere staff can reach without email.");
+    text(s, "An incident may involve a suspicious link being clicked, an account being taken over, locked files, a lost work laptop, an unexpected payment, or an unavailable system.");
+    text(s, "Priority system reported: " + system + ". Unavailable service or unauthorized access to this system needs prompt review.");
+    text(s, a.sensitiveData === "Yes" ? "Sensitive information is reported: unauthorized access to customer, employee or financial records may require urgent review." : a.sensitiveData === "No" ? "No sensitive information was reported. Check what information is affected rather than assuming no exposure is possible." : "Sensitive information handling is unconfirmed. Establish whether personal or financial information may be affected.");
+
+    s = section(pages[1].body, 3, "Roles and Emergency Contacts");
+    text(s, "Confirmed from assessment: primary reporting contact — " + (contact || "not confirmed") + "; alternate contact available — " + reported(a.alternateContact) + ". A reporting contact is not automatically the coordinator or decision approver.");
+    text(s, technical);
+    table(s, ["Role / responsibility", "Name and phone — complete before an emergency"], [
+        ["Incident Coordinator — organizes response and updates", "Name: __________________  Phone: __________________"],
+        ["Alternate Coordinator — takes over if unavailable", "Name: __________________  Phone: __________________"],
+        ["Technical Responder — investigates; recommends safe actions", "Name: __________________  Phone: __________________"],
+        ["Decision Approver — approves disruption and spending", "Name: __________________  Phone: __________________"],
+        ["Primary reporting contact", (contact || "Not yet assigned — complete before an emergency") + " · Phone: __________________"],
+        ["External IT Provider — if applicable", "Provider: ________________  Phone: __________________"],
+        ["Bank Fraud Contact — if applicable", "Name: __________________  Phone: __________________"],
+        ["Cyber Insurance Contact — if applicable", "Name: __________________  Phone: __________________"],
+        ["Legal Advisor — if applicable", "Name: __________________  Phone: __________________"],
+        ["Law enforcement — jurisdiction to confirm", "Local agency / phone: __________________  In the US: report internet crime at ic3.gov (FBI IC3); not an emergency service."]
+    ]);
+    s = section(pages[1].body, 4, "How to Report a Cybersecurity Problem");
+    text(s, "Contact first: " + (contact || "Not yet assigned — complete before an emergency") + ". If unavailable, use the confirmed alternate contact; name / phone: __________________.");
+    text(s, "Preferred reporting method (assessment): " + reported(a.reportingMethod) + ". " + (a.reportingMethod === "Not Established" || !a.reportingMethod || a.reportingMethod === "Not Sure" ? "Agree and share a reporting route before an emergency. " : "") + "Phone / address / reporting location: __________________.");
+    text(s, "Backup route if email or the network is unavailable: phone or in person, subject to confirmation. Phone / safe meeting location: __________________. Do not use a suspected compromised account to coordinate the response.");
+    list(s, ["What happened, and when did you notice it?", "Which computer, account or system is affected? Is it still happening?", "Preserve available screenshots or warning messages without reopening suspicious content."]);
+    s.append(el("h3", "What NOT to Do"));
+    list(s, ["Do not delete suspicious emails, messages or files, or investigate links or files yourself.", "Do not restart, shut down or disconnect equipment unless directed by the authorized responder, except where immediate safety requires action.", "Do not pay ransom or send money without authorized review.", "Do not discuss the incident publicly or share sensitive information."]);
+
+    s = section(pages[2].body, 5, "Incident Severity Levels");
+    text(s, "Suggested notification urgency, not an approved response-time policy. The coordinator and technical responder assess severity; the decision approver authorizes disruptive actions. If unsure, request prompt technical review.");
+    table(s, ["Level / example", "Notify / urgency"], [
+        ["LOW — suspicious email received but not opened", "Report through the normal reporting route."],
+        ["MEDIUM — suspicious link clicked or unexpected sign-in", "Notify coordinator promptly; request technical review."],
+        ["HIGH — locked files, " + system + " unavailable" + (a.sensitiveData === "Yes" ? ", or possible sensitive information exposure" : ", or possible information exposure"), "Contact coordinator and technical responder immediately; begin response."]
+    ]);
+    text(s, "Severity assessment process reported: " + reported(a.incidentSeverity) + ". " + (a.incidentSeverity === "Yes" ? "Use the approved process and confirm escalation contacts." : "Confirm severity examples and who escalates; this suggested guide requires approval."));
+    s = section(pages[2].body, 6, "What to Do During the First Hour");
+    s.classList.add("plan-first-hour");
+    const phases = [
+        ["FIRST 0–10 MINUTES · NOTICE AND REPORT", ["Stop interacting with anything suspicious. Record what happened and when.", "Contact " + (contact || "the designated emergency contact — assignment required") + "; use the backup route on page 2 if needed.", "Preserve messages and available evidence without opening suspicious content."]],
+        ["10–20 MINUTES · ASSESS", ["Coordinator: identify affected systems or accounts; decide Low, Medium or High with technical help.", "Request qualified technical review. " + (a.itSupport === "No IT Support" ? "No dedicated IT support is reported: arrange help; do not investigate yourself." : "Confirm the technical responder can assist."), "Start the incident log on page 5."]],
+        ["20–40 MINUTES · CONTAIN", ["Authorized technical responder: recommend safe steps; obtain approval before disconnecting critical systems or taking disruptive actions.", "Restrict access or isolate equipment only when directed by authorized personnel. Record actions and approvals.", "Device isolation procedures reported: " + reported(a.deviceIsolation) + ". " + (a.deviceIsolation === "Yes" ? "Use confirmed approved instructions." : "Procedures need confirmation; do not improvise disconnections.")]],
+        ["40–60 MINUTES · PLAN RECOVERY AND COMMUNICATION", ["Identify affected services. Priority system: " + system + ".", backup, "Decide what staff need to know; assign owners and next steps. Recovery procedures: " + reported(a.recoveryProcedures) + "; backup testing: " + (a.backups === "Yes" ? reported(a.backupTesting) : "not applicable until backup availability is established") + ". Confirm details on page 4."]]
+    ];
+    phases.forEach(([title, items]) => { const block = el("div", undefined, "plan-phase"); block.append(el("h3", title)); list(block, items, true); s.append(block); });
+    text(s, "These are suggested checkpoints, not guarantees that containment or recovery can be completed within an hour.");
+
+    s = section(pages[3].body, 7, "Recovering the Critical System");
+    text(s, "Priority system to recover: " + system, "plan-org");
+    text(s, "Coordinator: __________________ organizes recovery. Technical responder: __________________ performs technical work. Decision approver: __________________ approves service interruption and return to use.");
+    text(s, technical); text(s, backup);
+    text(s, a.backups === "Yes" ? "Backup location / service: __________________. Backup owner: __________________. Restoration testing reported: " + reported(a.backupTesting) + ". " + (a.backupTesting === "Yes" ? "Confirm the latest test date, scope and result; this does not establish that current copies are safe." : "Do not assume restoration will work; qualified help must verify usability safely.") : "Backup location and restoration testing: not established for recovery. " + (a.backups === "No" ? "Assign an owner to create protected copies before a future emergency; do not copy potentially compromised files without technical review." : "Verify availability, location, owner and test results before considering restoration."));
+    text(s, "Recovery procedures reported: " + reported(a.recoveryProcedures) + ". " + (a.recoveryProcedures === "Yes" ? "Locate and validate approved instructions with the responder." : a.recoveryProcedures === "Partially" ? "Complete missing recovery steps with qualified help before relying on them." : "Document safe recovery steps with qualified help; no complete procedure is assumed."));
+    const workarounds = { "Customer Records": "an approved paper intake process with restricted access and secure storage to protect personal information", "Email": "an approved alternate phone or in-person communication method", "Financial Systems": "an approved temporary transaction-recording process with authorization checks", "Shared Files": "an approved way to access verified safe essential documents", "Website": "an approved alternate way for customers to contact the organization" };
+    text(s, "Suggested temporary workaround — requires approval, not an existing policy: " + (workarounds[a.criticalSystems] || "agree a safe way to continue essential work without the affected system") + ". Owner / approval: __________________.");
+    list(s, ["Technical responder: determine what happened and address the cause before bringing systems back.", "Verify safe system configuration, account access and any recovery copies; restore only under qualified direction.", "Test essential tasks and check that information is accurate. Coordinator and approver confirm return to service; monitor for further problems and log the result."], true);
+    s = section(pages[3].body, 8, "Communicating During an Incident");
+    text(s, "Recovery communication process reported: " + reported(a.recoveryCommunication) + ". " + (a.recoveryCommunication === "Yes" ? "Confirm the approved process and current contacts." : a.recoveryCommunication === "Partially" ? "Complete missing update responsibilities and channels." : "Confirm an update process; none is assumed established."));
+    text(s, "Coordinator arranges internal updates. External communication approver: __________________. Authorized customer / partner spokesperson: __________________. Confirm these roles; do not assume the reporting contact has approval authority.");
+    text(s, "If email is unavailable, use an approved phone or in-person update route. Method / location: __________________. Next update time: __________________. Log the audience, sender, time and exact information shared.");
+    text(s, "Sample message: “We are currently investigating a technology issue affecting some of our services. Our team is working to understand the situation. We will provide another update when more information is available.”");
+    text(s, (a.sensitiveData === "Yes" ? "Sensitive information is reported. " : a.sensitiveData === "No" ? "Sensitive information was not reported, but check the actual affected data. " : "Confirm whether sensitive information is involved. ") + "Do not assume a data breach occurred. If information may have been exposed, notification duties depend on jurisdiction, data and circumstances. Obtain qualified legal advice before external notifications, while meeting applicable legal reporting deadlines.");
+
+    s = section(pages[4].body, 9, "Incident Log");
+    text(s, "Incident reference / date: __________________  Log keeper: __________________");
+    text(s, "Record facts as accurately as possible. Do not guess or change earlier entries without noting the correction. Keep sensitive details secure.");
+    table(s, ["Time", "What Happened", "Action Taken", "Person Responsible"], Array.from({length: 8}, () => ["", "", "", ""]), "plan-log");
+    s = section(pages[4].body, 10, "Keeping the Plan Updated");
+    text(s, "Review at least annually (next review: " + fmt(review) + "), after an incident or tabletop exercise, and when key staff, contact details, critical systems or IT providers change.");
+    text(s, "Response exercises reported: " + reported(a.responseExercises) + ". " + (a.responseExercises === "Yes" ? "Repeat a discussion exercise and follow up on lessons learned." : a.responseExercises === "No" ? "Schedule a short discussion exercise; use Antzecure's 20-Minute Exercise to practice without changing live systems." : "Confirm whether exercises have occurred; record the result and schedule practice if needed."));
+    list(s, ["Contact information is current.", "Roles and responsibilities are confirmed.", "Critical systems are identified.", "Backup and recovery information is accurate.", "Staff know how to report a problem.", "The plan has been reviewed and practiced."], true);
+    text(s, "Reviewed by / date: __________________  Next practice date: __________________");
+    text(s, "Notes / follow-up owner: __________________________________________________");
+    text(s, "________________________________________________________________________");
+    text(s, "Basis: NIST CSF 2.0 (Respond / Recover), NIST SP 800-61 Rev. 3, and CISA incident response guidance. This self-reported starter requires local approval and qualified advice; it does not establish compliance. Reference: nist.gov/cyberframework · cisa.gov/stopransomware/ive-been-hit-ransomware");
+    text(s, "Assessment answers are self-reported; suggested actions are recommendations. Blank or unconfirmed fields must be completed by your organization. Store a verified copy securely where staff can reach it during an outage.");
 }
