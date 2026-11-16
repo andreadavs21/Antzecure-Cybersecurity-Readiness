@@ -407,3 +407,35 @@ footer p { margin: 0; }
     .resource-incidentPlan .plan-sheet:nth-child(2) .plan-table th:first-child { width: 43%; }
 }
 .plan-emergency-guide { color: var(--red); font-weight: 700; border-left: 3px solid var(--red); padding-left: 10px; }
+
+/* Short prototype: two readable sheets, exactly three response steps. */
+.draft-sheet { background: white; padding: 28px 32px; margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.draft-header { border-bottom: 2px solid var(--red); padding-bottom: 12px; }
+.draft-header p { margin: 4px 0; }
+.draft-title { font-size: 24px; font-weight: 700; margin: 6px 0; line-height: 1.2; }
+.draft-organization { font-size: 17px; font-weight: 700; }
+.draft-date, .draft-note { color: var(--muted); font-size: 12px; }
+.readiness-report .draft-step { margin-top: 20px; }
+.readiness-report .draft-step > h2 { display: flex; align-items: baseline; gap: 12px; font-size: 21px; margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.draft-step-number { color: var(--red); font-size: 26px; }
+.draft-explanation { margin: 8px 0; }
+.draft-step li { margin: 6px 0; }
+.draft-facts { border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-top: 12px; font-size: 12px; }
+.draft-facts p { margin: 5px 0; }
+.draft-facts .draft-facts-label { color: var(--muted); font-size: 11px; font-weight: 700; margin-bottom: 7px; }
+@media (max-width: 600px) { .draft-sheet { padding: 20px 16px; } .draft-title { font-size: 22px; } }
+@media print {
+    .resource-incidentPlan .draft-sheet { padding: 0; margin: 0; border: 0; border-radius: 0; font-size: 11pt; line-height: 1.3; break-after: page; page-break-after: always; }
+    .resource-incidentPlan .draft-sheet:last-child { break-after: auto; page-break-after: auto; }
+    .resource-incidentPlan .draft-title { font-size: 18pt; }
+    .resource-incidentPlan .draft-step > h2 { font-size: 15pt; }
+    .resource-incidentPlan .draft-step-number { font-size: 19pt; }
+    .resource-incidentPlan .draft-facts { font-size: 9.5pt; break-inside: avoid; }
+    .resource-incidentPlan .draft-step li { break-inside: avoid; }
+    .resource-incidentPlan .draft-step p { orphans: 2; widows: 2; }
+}
+@media print {
+    .resource-incidentPlan .draft-step { margin-top: 14px; }
+    .resource-incidentPlan .draft-step li { margin: 4px 0; }
+    .resource-incidentPlan .draft-facts { padding: 8px 10px; margin-top: 9px; }
+}
