@@ -311,7 +311,7 @@ function renderFirstSteps(recommendations, answers) {
 }
 
 const resourceTitles = {
-    incidentPlan: "Your Incident Response Plan",
+    incidentPlan: "Your Incident Response Plan — Draft",
     recommendations: "Cybersecurity Readiness Report",
     contacts: "Emergency Cybersecurity Contact Card",
     roadmap: "30/60/90-Day Cybersecurity Action Roadmap",
@@ -1363,9 +1363,8 @@ function recommendationReferences(rec) {
     return rec.nist.split("/").map(code => code.trim()).map(code => ({ code, name: technicalCategories[code][0], explanation: technicalCategories[code][1] }));
 }
 
-// The plan consumes the submitted snapshot and existing findings, not new assessment rules.
-function renderIncidentPlan(context) {
-    const { element: el, report, snapshot } = context;
+// Shared facts preserve unknown answers; both plan layouts use the same submitted data.
+function getIncidentPlanDetails(snapshot) {
     const a = snapshot.answers;
     const contact = knownResourceValue(a.emergencyContact);
     const system = knownResourceValue(a.criticalSystems) || "Critical system not confirmed — identify before an emergency";
@@ -1379,6 +1378,13 @@ function renderIncidentPlan(context) {
         : a.itSupport === "External IT Provider" ? "External IT provider reported; confirm the provider, named responder and urgent phone number."
         : a.itSupport === "Internal IT Team" ? "Internal IT team reported; confirm the named responder and urgent phone number."
         : "IT responsibility reported: " + reported(a.itSupport) + ". Confirm qualified technical assistance; this answer does not establish technical expertise.";
+    return { a, contact, system, reported, backup, technical };
+}
+
+// Retained for future expansion; the download uses the three-step draft below.
+function renderFullIncidentPlan(context) {
+    const { element: el, report, snapshot } = context;
+    const { a, contact, system, reported, backup, technical } = getIncidentPlanDetails(snapshot);
     const date = new Date(snapshot.generatedAt);
     const review = new Date(date);
     // Clamp leap-day anniversaries to the last day of February.
@@ -1508,4 +1514,85 @@ function renderIncidentPlan(context) {
     text(s, "________________________________________________________________________");
     text(s, "Basis: NIST CSF 2.0 (Respond / Recover), NIST SP 800-61 Rev. 3, and CISA incident response guidance. This self-reported starter requires local approval and qualified advice; it does not establish compliance. Reference: nist.gov/cyberframework · cisa.gov/stopransomware/ive-been-hit-ransomware");
     text(s, "Assessment answers are self-reported; suggested actions are recommendations. Blank or unconfirmed fields must be completed by your organization. Store a verified copy securely where staff can reach it during an outage.");
+}
+
+// The existing resource entry point now renders the short demo draft only.
+function renderIncidentPlan(context) {
+    const { element: el, report, snapshot } = context;
+    const { a, contact, system, backup, technical } = getIncidentPlanDetails(snapshot);
+    const date = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(new Date());
+    const pages = [1, 2].map(number => {
+        const page = el("article", undefined, "draft-sheet");
+        const header = el("header", undefined, "draft-header");
+        header.append(el("p", "ANTZECURE", "report-brand"));
+        header.append(el(number === 1 ? "h1" : "p", "Your Incident Response Plan — Draft", "draft-title"));
+        header.append(el("p", snapshot.organizationName, "draft-organization"));
+        if (number === 1) {
+            header.append(el("p", "Date generated: " + date, "draft-date"));
+            header.append(el("p", "Starter draft — review and complete contact details before use.", "draft-note"));
+        }
+        const body = el("div", undefined, "draft-body");
+        page.append(header, body, el("footer", "Antzecure · Draft · Page " + number + " of 2", "plan-footer"));
+        return { page, body };
+    });
+    report.replaceChildren(...pages.map(p => p.page));
+    function step(page, number, title, explanation, actions, facts) {
+        const section = el("section", undefined, "draft-step");
+        section.dataset.planStep = number;
+        const heading = el("h2");
+        heading.append(el("span", String(number).padStart(2, "0"), "draft-step-number"), el("span", title));
+        section.append(heading, el("p", explanation, "draft-explanation"));
+        const checklist = el("ul", undefined, "plan-checklist");
+        actions.forEach(action => checklist.append(el("li", action)));
+        const info = el("div", undefined, "draft-facts");
+        info.append(el("p", "Your assessment and details to confirm", "draft-facts-label"));
+        facts.forEach(([label, value]) => {
+            const line = el("p");
+            line.append(el("strong", label + ": "), report.ownerDocument.createTextNode(value));
+            info.append(line);
+        });
+        section.append(checklist, info); page.append(section);
+    }
+    const method = a.reportingMethod;
+    const knownMethod = ["Phone", "Email", "In Person"].includes(method);
+    step(pages[0].body, 1, "Report the Problem",
+        "If you notice something unusual, tell the right person as soon as possible.", [
+            "Stop interacting with suspicious emails, links, or files.",
+            "Contact the person responsible for handling cybersecurity problems.",
+            "Explain what happened and when you noticed it.",
+            "Identify which computer, account, or system may be affected."
+        ], [
+            ["Primary emergency contact", contact || "Not confirmed — name: __________________"],
+            ["Preferred reporting method", knownMethod ? method + " — " + (method === "Email" ? "address" : method === "Phone" ? "phone" : "location") + ": __________________" : "Not confirmed — method / details: __________________"],
+            ["Alternate contact", a.alternateContact === "Yes" ? "Reported available — name / phone: __________________" : a.alternateContact === "No" ? "None reported — arrange a backup contact; name / phone: __________________" : "Availability not confirmed — name / phone: __________________"],
+            ["Backup reporting", (method === "Email" ? "If email is unavailable, use a confirmed phone or in-person method. " : "If the normal route is unavailable, use a confirmed phone or in-person method. ") + "Phone / location: __________________"]
+        ]);
+    step(pages[0].body, 2, "Protect Your Organization",
+        "Take safe steps to prevent the problem from getting worse while waiting for help.", [
+            a.itSupport === "No IT Support" ? "Ask the responsible person to arrange qualified assistance; no dedicated IT support is reported." : "Notify the organization's IT support or designated responder; confirm who can help.",
+            "Do not delete suspicious messages or other evidence.",
+            "Do not restart or disconnect affected equipment unless instructed by authorized personnel, except where immediate safety requires action.",
+            "Have the responsible person assess whether important systems or sensitive information are affected.",
+            "Record what happened and any actions taken."
+        ], [
+            ["IT support", technical],
+            ["Critical system", system],
+            ["Sensitive information", a.sensitiveData === "Yes" ? "Your organization reports handling it. Check whether any may be affected; exposure is not confirmed." : a.sensitiveData === "No" ? "None reported. Check the actual affected information rather than assuming no risk." : "Not confirmed — ask what information may be affected."],
+            ["Device isolation", a.deviceIsolation === "Yes" ? "Procedures reported. Follow approved instructions only when directed by authorized personnel." : a.deviceIsolation === "Partially" ? "Procedures are incomplete. Confirm safe instructions with qualified help; do not improvise disconnections." : "Procedures not confirmed or not in place. Obtain qualified guidance; do not improvise disconnections."]
+        ]);
+    step(pages[1].body, 3, "Recover and Follow Up",
+        "Work with the responsible people to restore normal operations safely.", [
+            "Identify which important systems need to be restored.",
+            a.backups === "No" ? "No backups are reported. Arrange qualified help to assess other recovery options; do not assume backup restoration is possible." : a.backups === "Yes" ? "Have qualified personnel confirm that backups are safe and usable before any restoration." : "Confirm whether backups exist and are safe; do not assume they are available.",
+            "Have qualified personnel verify that affected systems are safe before returning them to use.",
+            "Inform employees about the status of the problem through an approved method.",
+            "Record what happened and identify improvements for the future."
+        ], [
+            ["Priority system to recover", system],
+            ["Backups", backup],
+            ["Backup testing", a.backups !== "Yes" ? "Not established for recovery — confirm backup availability first." : a.backupTesting === "Yes" ? "Testing reported. Confirm the latest result; qualified personnel must still check current copies." : a.backupTesting === "No" ? "Backups have not been tested. Have qualified personnel verify usability; do not assume restoration will work." : "Testing status is unconfirmed — ask the backup owner or provider to verify."],
+            ["Recovery procedures", a.recoveryProcedures === "Yes" ? "Procedures reported. Locate the approved instructions and confirm who performs recovery." : a.recoveryProcedures === "Partially" ? "Procedures are incomplete. Confirm missing steps with qualified help." : a.recoveryProcedures === "No" ? "No procedures reported. Arrange qualified help to agree safe recovery steps." : "Status unconfirmed. Check whether approved recovery instructions exist."],
+            ["Staff updates", a.recoveryCommunication === "Yes" ? "A process is reported. Confirm the person and approved method; use an approved phone or in-person route if email is unavailable." : a.recoveryCommunication === "Partially" ? "The process is incomplete. Agree who updates staff and how, including a backup if email is unavailable." : "An update process is not confirmed or not in place. Agree who updates staff and which approved method works if email is unavailable."],
+            ["Details to complete", "Recovery lead: __________________  Staff update contact / method: __________________"]
+        ]);
 }
