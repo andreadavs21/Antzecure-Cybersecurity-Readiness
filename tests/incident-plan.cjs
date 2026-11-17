@@ -12,8 +12,8 @@ const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors
 await page.goto(process.env.TEST_URL || 'http://127.0.0.1:8000');
 const cases=[
  {name:'Small Office',employeeCount:'1-10',itSupport:'No IT Support',existingPlan:'No',backups:'No',criticalSystems:'Email',backupTesting:'Not Applicable',reportingMethod:'Email',alternateContact:'No'},
- {name:'Nonprofit',employeeCount:'11-25',itSupport:'External IT Provider',existingPlan:'Partially',backups:'Yes',backupTesting:'No',criticalSystems:'Customer Records',reportingMethod:'Phone',alternateContact:'Yes'},
- {name:'Small Clinic',employeeCount:'1-10',itSupport:'Internal IT Team',existingPlan:'Yes',backups:'Yes',backupTesting:'Yes',criticalSystems:'Customer Records',mfa:'Yes',sensitiveData:'Yes',reportingMethod:'In Person',alternateContact:'Yes'}
+ {name:'Nonprofit',employeeCount:'11-25',itSupport:'External IT Provider',existingPlan:'Partially',backups:'Yes',backupTesting:'No',criticalSystems:'Customer Records',reportingMethod:'Phone',alternateContact:'Yes',deviceIsolation:'Not Sure'},
+ {name:'Small Clinic',employeeCount:'1-10',itSupport:'Internal IT Team',existingPlan:'Yes',backups:'Yes',backupTesting:'Yes',criticalSystems:'Customer Records',mfa:'Yes',sensitiveData:'Yes',reportingMethod:'In Person',alternateContact:'Yes',deviceIsolation:'Yes'}
 ];
 for(const [i,org] of cases.entries()){
  await page.evaluate(org=>{
@@ -36,7 +36,12 @@ for(const [i,org] of cases.entries()){
  assert(body.includes(org.name));assert(!body.includes('UNSUBMITTED'));
  assert(body.includes(org.criticalSystems));assert.equal(await popup.locator('[data-plan-step]').count(),3);
  assert.equal(await popup.locator('[data-plan-section], table').count(),0);
- assert.deepEqual(await popup.locator('h2').allTextContents(),['01Report the Problem','02Protect Your Organization','03Recover and Follow Up']);
+ assert.deepEqual(await popup.locator('h2').allTextContents(),['01Report and Prevent the Problem from Spreading','02Protect Your Organization','03Recover and Follow Up']);
+ assert.equal(await popup.locator('.draft-contacts h3').textContent(),'Who to Contact');
+ assert.deepEqual(await popup.locator('.draft-contacts a').evaluateAll(links=>links.map(a=>a.href)),['https://www.cisa.gov/report','https://www.ic3.gov/']);
+ for(const guidance of ['promptly isolate the affected device from the network using approved instructions, when safe and possible','immediately contact the designated IT responder','Do not shut down, restart, wipe, or investigate','Notify the incident coordinator or manager and IT support immediately','Coverage not confirmed','Name / phone:','For suspected ransomware or active spreading, follow Step 1 isolation guidance']) assert(body.includes(guidance),guidance);
+ if(org.deviceIsolation==='Yes') assert(body.includes('For suspected ransomware or spreading, promptly follow approved isolation instructions'));
+ assert(!body.includes('Do not restart or disconnect affected equipment unless instructed'));
  assert(body.includes('Starter draft — review and complete contact details before use.'));
  assert(body.includes(org.name==='Small Office'?'Not confirmed — name:':'Office Manager'));
  assert(body.includes(org.alternateContact==='Yes'?'Reported available':'None reported'));

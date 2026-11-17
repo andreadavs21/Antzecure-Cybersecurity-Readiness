@@ -439,3 +439,12 @@ footer p { margin: 0; }
     .resource-incidentPlan .draft-step li { margin: 4px 0; }
     .resource-incidentPlan .draft-facts { padding: 8px 10px; margin-top: 9px; }
 }
+
+/* Keep urgent reporting and all contact routes together on the first sheet. */
+.draft-contacts h3 { margin: 0 0 7px; font-size: 14px; }
+.draft-contacts a { overflow-wrap: anywhere; }
+@media print {
+    .resource-incidentPlan .draft-sheet { font-size: 10.5pt; }
+    .resource-incidentPlan .draft-facts p { margin: 3px 0; }
+    .resource-incidentPlan .draft-contacts { break-inside: avoid; }
+}
