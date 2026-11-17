@@ -18,15 +18,17 @@ support and untested backups; and an organization with internal support and test
 backups. They verify three response steps, contact and reporting details, personalized
 systems and recovery guidance, missing/unknown/partial answers, safe text rendering,
 latest submitted answers, two US Letter pages with matching footers, mobile page width,
-and the existing recommendations, contact card and tabletop downloads.
+ransomware isolation instructions without conflicting disconnection advice, the Who to
+Contact fields and official CISA/IC3 links, and the existing recommendations, contact
+card and tabletop downloads.
 
 Manual Chrome / Safari demo check
 ---------------------------------
 
 Complete and submit an assessment. In Your Preparedness Resources select Download
 Incident Response Plan Draft. In the new tab choose Print / Save as PDF, select US Letter
-at 100%, and disable browser headers and footers. Confirm there are two pages: Report
-and Protect on page 1; Recover on page 2. Check that the organization, reporting method,
+at 100%, and disable browser headers and footers. Confirm there are two pages: Report and Prevent the Problem from Spreading, including
+Who to Contact, on page 1; Protect and Recover on page 2. Check that the organization, reporting method,
 IT support, critical system and backup guidance match the submitted answers. Change
 answers, submit again and open a fresh draft to verify the updated guidance.
 

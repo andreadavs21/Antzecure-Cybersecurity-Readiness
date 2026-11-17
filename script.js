@@ -1552,13 +1552,17 @@ function renderIncidentPlan(context) {
             info.append(line);
         });
         section.append(checklist, info); page.append(section);
+        return section;
     }
     const method = a.reportingMethod;
     const knownMethod = ["Phone", "Email", "In Person"].includes(method);
-    step(pages[0].body, 1, "Report the Problem",
+    const firstStep = step(pages[0].body, 1, "Report and Prevent the Problem from Spreading",
         "If you notice something unusual, tell the right person as soon as possible.", [
-            "Stop interacting with suspicious emails, links, or files.",
-            "Contact the person responsible for handling cybersecurity problems.",
+            "Stop using the suspicious device. Do not open suspicious emails, links, or files.",
+            "If ransomware (files locked for payment) or active spreading is suspected, promptly isolate the affected device from the network using approved instructions, when safe and possible.",
+            "If unsure how to isolate it, immediately contact the designated IT responder for instructions. If none is assigned, ask the coordinator or manager to arrange qualified help immediately.",
+            "Do not shut down, restart, wipe, or investigate the device without authorized guidance, unless immediate safety requires action.",
+            "Notify the incident coordinator or manager and IT support immediately. Use the contacts below.",
             "Explain what happened and when you noticed it.",
             "Identify which computer, account, or system may be affected."
         ], [
@@ -1567,18 +1571,38 @@ function renderIncidentPlan(context) {
             ["Alternate contact", a.alternateContact === "Yes" ? "Reported available — name / phone: __________________" : a.alternateContact === "No" ? "None reported — arrange a backup contact; name / phone: __________________" : "Availability not confirmed — name / phone: __________________"],
             ["Backup reporting", (method === "Email" ? "If email is unavailable, use a confirmed phone or in-person method. " : "If the normal route is unavailable, use a confirmed phone or in-person method. ") + "Phone / location: __________________"]
         ]);
-    step(pages[0].body, 2, "Protect Your Organization",
+    const contacts = el("div", undefined, "draft-facts draft-contacts");
+    contacts.append(el("h3", "Who to Contact"));
+    const contactRows = [
+        ["Incident coordinator or manager", "Name / phone: __________________. Primary reporting contact from assessment: " + (contact || "Not confirmed — name: __________________") + ". Confirm who will lead the response; the primary contact may have a different role."],
+        ["IT support", technical + " Name / phone: __________________"],
+        ["Cyber insurance provider (if applicable)", "Coverage not confirmed. Provider / claims phone: __________________"]
+    ];
+    contactRows.forEach(([label, value]) => {
+        const line = el("p");
+        line.append(el("strong", label + ": "), report.ownerDocument.createTextNode(value));
+        contacts.append(line);
+    });
+    [["CISA", "https://www.cisa.gov/report"], ["FBI Internet Crime Complaint Center", "https://www.ic3.gov/"]].forEach(([label, url]) => {
+        const line = el("p");
+        const link = el("a", url);
+        link.href = url;
+        line.append(el("strong", label + ": "), link);
+        contacts.append(line);
+    });
+    firstStep.append(contacts);
+    step(pages[1].body, 2, "Protect Your Organization",
         "Take safe steps to prevent the problem from getting worse while waiting for help.", [
             a.itSupport === "No IT Support" ? "Ask the responsible person to arrange qualified assistance; no dedicated IT support is reported." : "Notify the organization's IT support or designated responder; confirm who can help.",
             "Do not delete suspicious messages or other evidence.",
-            "Do not restart or disconnect affected equipment unless instructed by authorized personnel, except where immediate safety requires action.",
+            "For suspected ransomware or active spreading, follow Step 1 isolation guidance. Otherwise, do not disconnect equipment without authorized instructions. Do not shut down, restart, wipe, or investigate it without authorized guidance, unless immediate safety requires action.",
             "Have the responsible person assess whether important systems or sensitive information are affected.",
             "Record what happened and any actions taken."
         ], [
             ["IT support", technical],
             ["Critical system", system],
             ["Sensitive information", a.sensitiveData === "Yes" ? "Your organization reports handling it. Check whether any may be affected; exposure is not confirmed." : a.sensitiveData === "No" ? "None reported. Check the actual affected information rather than assuming no risk." : "Not confirmed — ask what information may be affected."],
-            ["Device isolation", a.deviceIsolation === "Yes" ? "Procedures reported. Follow approved instructions only when directed by authorized personnel." : a.deviceIsolation === "Partially" ? "Procedures are incomplete. Confirm safe instructions with qualified help; do not improvise disconnections." : "Procedures not confirmed or not in place. Obtain qualified guidance; do not improvise disconnections."]
+            ["Device isolation", a.deviceIsolation === "Yes" ? "Procedures reported. For suspected ransomware or spreading, promptly follow approved isolation instructions when safe and possible (Step 1). If unsure, ask the IT responder immediately." : a.deviceIsolation === "Partially" ? "Procedures are incomplete. Confirm safe instructions with qualified help; do not improvise disconnections." : "Procedures not confirmed or not in place. Obtain qualified guidance; do not improvise disconnections."]
         ]);
     step(pages[1].body, 3, "Recover and Follow Up",
         "Work with the responsible people to restore normal operations safely.", [
