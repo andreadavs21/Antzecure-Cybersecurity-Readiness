@@ -1516,107 +1516,155 @@ function renderFullIncidentPlan(context) {
     text(s, "Assessment answers are self-reported; suggested actions are recommendations. Blank or unconfirmed fields must be completed by your organization. Store a verified copy securely where staff can reach it during an outage.");
 }
 
-// The existing resource entry point now renders the short demo draft only.
+// The existing resource entry point consumes only the latest submitted answers.
+// Plan fields reuse the contact card helpers; their edits remain in this tab only.
 function renderIncidentPlan(context) {
     const { element: el, report, snapshot } = context;
-    const { a, contact, system, backup, technical } = getIncidentPlanDetails(snapshot);
-    const date = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(new Date());
-    const pages = [1, 2].map(number => {
-        const page = el("article", undefined, "draft-sheet");
-        const header = el("header", undefined, "draft-header");
-        header.append(el("p", "ANTZECURE", "report-brand"));
-        header.append(el(number === 1 ? "h1" : "p", "Your Incident Response Plan — Draft", "draft-title"));
-        header.append(el("p", snapshot.organizationName, "draft-organization"));
-        if (number === 1) {
-            header.append(el("p", "Date generated: " + date, "draft-date"));
-            header.append(el("p", "Starter draft — review and complete contact details before use.", "draft-note"));
+    const a = snapshot.answers;
+    const missing = new Set();
+    const contact = isKnownContact(a.emergencyContact) ? knownResourceValue(a.emergencyContact) : "";
+    const itPhrases = {
+        "Internal IT Team": "your internal IT team",
+        "External IT Provider": "your external IT provider",
+        "Office Manager": "your Office Manager",
+        "No IT Support": "your manager"
+    };
+    const it = itPhrases[a.itSupport] || "your manager";
+    const blank = (parent, label, value = "") => parent.append(editableLine(context, label, value, "draft-field"));
+    const paragraph = (parent, text, className) => {
+        const node = el("p", text, className); parent.append(node); return node;
+    };
+    const checks = parent => { const list = el("ul", undefined, "plan-checklist"); parent.append(list); return list; };
+    const item = (list, text, fields = []) => {
+        const li = el("li"); li.append(el("span", text));
+        if (fields.length) {
+            const row = el("div", undefined, "draft-field-row");
+            fields.forEach(([label, value]) => blank(row, label, value)); li.append(row);
         }
-        const body = el("div", undefined, "draft-body");
-        page.append(header, body, el("footer", "Antzecure · Draft · Page " + number + " of 2", "plan-footer"));
-        return { page, body };
-    });
-    report.replaceChildren(...pages.map(p => p.page));
-    function step(page, number, title, explanation, actions, facts) {
-        const section = el("section", undefined, "draft-step");
-        section.dataset.planStep = number;
+        list.append(li); return li;
+    };
+    function section(number, title, intro) {
+        const node = el("section", undefined, "draft-step"); node.dataset.planStep = number;
         const heading = el("h2");
-        heading.append(el("span", String(number).padStart(2, "0"), "draft-step-number"), el("span", title));
-        section.append(heading, el("p", explanation, "draft-explanation"));
-        const checklist = el("ul", undefined, "plan-checklist");
-        actions.forEach(action => checklist.append(el("li", action)));
-        const info = el("div", undefined, "draft-facts");
-        info.append(el("p", "Your assessment and details to confirm", "draft-facts-label"));
-        facts.forEach(([label, value]) => {
-            const line = el("p");
-            line.append(el("strong", label + ": "), report.ownerDocument.createTextNode(value));
-            info.append(line);
-        });
-        section.append(checklist, info); page.append(section);
-        return section;
+        heading.append(el("span", String(number).padStart(2, "0"), "draft-step-number"), el("span", " — " + title));
+        node.append(heading); paragraph(node, intro, "draft-explanation"); report.append(node); return node;
     }
-    const method = a.reportingMethod;
-    const knownMethod = ["Phone", "Email", "In Person"].includes(method);
-    const firstStep = step(pages[0].body, 1, "Report and Prevent the Problem from Spreading",
-        "If you notice something unusual, tell the right person as soon as possible.", [
-            "Stop using the suspicious device. Do not open suspicious emails, links, or files.",
-            "If ransomware (files locked for payment) or active spreading is suspected, promptly isolate the affected device from the network using approved instructions, when safe and possible.",
-            "If unsure how to isolate it, immediately contact the designated IT responder for instructions. If none is assigned, ask the coordinator or manager to arrange qualified help immediately.",
-            "Do not shut down, restart, wipe, or investigate the device without authorized guidance, unless immediate safety requires action.",
-            "Notify the incident coordinator or manager and IT support immediately. Use the contacts below.",
-            "Explain what happened and when you noticed it.",
-            "Identify which computer, account, or system may be affected."
-        ], [
-            ["Primary emergency contact", contact || "Not confirmed — name: __________________"],
-            ["Preferred reporting method", knownMethod ? method + " — " + (method === "Email" ? "address" : method === "Phone" ? "phone" : "location") + ": __________________" : "Not confirmed — method / details: __________________"],
-            ["Alternate contact", a.alternateContact === "Yes" ? "Reported available — name / phone: __________________" : a.alternateContact === "No" ? "None reported — arrange a backup contact; name / phone: __________________" : "Availability not confirmed — name / phone: __________________"],
-            ["Backup reporting", (method === "Email" ? "If email is unavailable, use a confirmed phone or in-person method. " : "If the normal route is unavailable, use a confirmed phone or in-person method. ") + "Phone / location: __________________"]
-        ]);
-    const contacts = el("div", undefined, "draft-facts draft-contacts");
-    contacts.append(el("h3", "Who to Contact"));
-    const contactRows = [
-        ["Incident coordinator or manager", "Name / phone: __________________. Primary reporting contact from assessment: " + (contact || "Not confirmed — name: __________________") + ". Confirm who will lead the response; the primary contact may have a different role."],
-        ["IT support", technical + " Name / phone: __________________"],
-        ["Cyber insurance provider (if applicable)", "Coverage not confirmed. Provider / claims phone: __________________"]
-    ];
-    contactRows.forEach(([label, value]) => {
-        const line = el("p");
-        line.append(el("strong", label + ": "), report.ownerDocument.createTextNode(value));
-        contacts.append(line);
-    });
-    [["CISA", "https://www.cisa.gov/report"], ["FBI Internet Crime Complaint Center", "https://www.ic3.gov/"]].forEach(([label, url]) => {
-        const line = el("p");
-        const link = el("a", url);
-        link.href = url;
-        line.append(el("strong", label + ": "), link);
-        contacts.append(line);
-    });
-    firstStep.append(contacts);
-    step(pages[1].body, 2, "Protect Your Organization",
-        "Take safe steps to prevent the problem from getting worse while waiting for help.", [
-            a.itSupport === "No IT Support" ? "Ask the responsible person to arrange qualified assistance; no dedicated IT support is reported." : "Notify the organization's IT support or designated responder; confirm who can help.",
-            "Do not delete suspicious messages or other evidence.",
-            "For suspected ransomware or active spreading, follow Step 1 isolation guidance. Otherwise, do not disconnect equipment without authorized instructions. Do not shut down, restart, wipe, or investigate it without authorized guidance, unless immediate safety requires action.",
-            "Have the responsible person assess whether important systems or sensitive information are affected.",
-            "Record what happened and any actions taken."
-        ], [
-            ["IT support", technical],
-            ["Critical system", system],
-            ["Sensitive information", a.sensitiveData === "Yes" ? "Your organization reports handling it. Check whether any may be affected; exposure is not confirmed." : a.sensitiveData === "No" ? "None reported. Check the actual affected information rather than assuming no risk." : "Not confirmed — ask what information may be affected."],
-            ["Device isolation", a.deviceIsolation === "Yes" ? "Procedures reported. For suspected ransomware or spreading, promptly follow approved isolation instructions when safe and possible (Step 1). If unsure, ask the IT responder immediately." : a.deviceIsolation === "Partially" ? "Procedures are incomplete. Confirm safe instructions with qualified help; do not improvise disconnections." : "Procedures not confirmed or not in place. Obtain qualified guidance; do not improvise disconnections."]
-        ]);
-    step(pages[1].body, 3, "Recover and Follow Up",
-        "Work with the responsible people to restore normal operations safely.", [
-            "Identify which important systems need to be restored.",
-            a.backups === "No" ? "No backups are reported. Arrange qualified help to assess other recovery options; do not assume backup restoration is possible." : a.backups === "Yes" ? "Have qualified personnel confirm that backups are safe and usable before any restoration." : "Confirm whether backups exist and are safe; do not assume they are available.",
-            "Have qualified personnel verify that affected systems are safe before returning them to use.",
-            "Inform employees about the status of the problem through an approved method.",
-            "Record what happened and identify improvements for the future."
-        ], [
-            ["Priority system to recover", system],
-            ["Backups", backup],
-            ["Backup testing", a.backups !== "Yes" ? "Not established for recovery — confirm backup availability first." : a.backupTesting === "Yes" ? "Testing reported. Confirm the latest result; qualified personnel must still check current copies." : a.backupTesting === "No" ? "Backups have not been tested. Have qualified personnel verify usability; do not assume restoration will work." : "Testing status is unconfirmed — ask the backup owner or provider to verify."],
-            ["Recovery procedures", a.recoveryProcedures === "Yes" ? "Procedures reported. Locate the approved instructions and confirm who performs recovery." : a.recoveryProcedures === "Partially" ? "Procedures are incomplete. Confirm missing steps with qualified help." : a.recoveryProcedures === "No" ? "No procedures reported. Arrange qualified help to agree safe recovery steps." : "Status unconfirmed. Check whether approved recovery instructions exist."],
-            ["Staff updates", a.recoveryCommunication === "Yes" ? "A process is reported. Confirm the person and approved method; use an approved phone or in-person route if email is unavailable." : a.recoveryCommunication === "Partially" ? "The process is incomplete. Agree who updates staff and how, including a backup if email is unavailable." : "An update process is not confirmed or not in place. Agree who updates staff and which approved method works if email is unavailable."],
-            ["Details to complete", "Recovery lead: __________________  Staff update contact / method: __________________"]
-        ]);
+    report.replaceChildren(); report.classList.add("incident-draft");
+    const header = el("header", undefined, "draft-header");
+    paragraph(header, "Prepared with Antzecure", "report-brand");
+    header.append(el("h1", "Your Incident Response Plan — Draft", "draft-title"));
+    paragraph(header, snapshot.organizationName, "draft-organization");
+    const dates = el("div", undefined, "draft-field-row draft-dates");
+    paragraph(dates, "Date created: " + new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(new Date()));
+    blank(dates, "Last reviewed"); header.append(dates);
+    paragraph(header, "Keep a printed copy. If your computers stop working, you will still have this plan.", "draft-note");
+    report.append(header);
+
+    const stop = section(1, "Stop the Spread", "If you think your computer has been attacked, take these steps to help stop the problem from spreading.");
+    // Scope the physical disconnect advice to an employee's own device, never shared equipment.
+    paragraph(stop, "These steps are for your own computer or device. Do not touch servers, routers, or other shared equipment; ask " + it + " first.", "draft-device-note");
+    const stopList = checks(stop);
+    item(stopList, "Stop using the affected computer or device.");
+    item(stopList, "Disconnect it from the internet: unplug its network cable or turn off Wi-Fi.");
+    item(stopList, "Keep it turned on. If you can't disconnect it, call " + it + " right away and ask whether to turn it off.");
+    item(stopList, "Do not delete suspicious emails, messages, or files.");
+    item(stopList, "Write down what you saw and when. If a warning message is on the screen, take a photo of it with your phone. Do not reopen suspicious emails, links, or files.");
+    item(stopList, "Do not reply to or pay anyone who demands money. Your leadership will decide what to do next.");
+    if (a.deviceIsolation === "Yes") {
+        const note = paragraph(stop, "Your organization has approved steps for disconnecting a device. Follow them.");
+        blank(note, "Where to find them");
+    } else if (a.deviceIsolation === "No") {
+        paragraph(stop, "Disconnecting your own computer from the internet is generally safe if it doesn't affect anyone else's work. For shared equipment, such as servers or network equipment, wait for instructions from " + it + ".");
+    } else {
+        paragraph(stop, "To disconnect your own computer, unplug the network cable from the computer or turn off its Wi-Fi. Do not touch servers, routers, or other shared equipment. Call " + it + " first.");
+        if (a.deviceIsolation === "Partially") paragraph(stop, "Your approved disconnect steps are not finished.");
+        else { blank(stop, "Approved disconnect steps — confirm where to find them"); missing.add("Confirm approved disconnect steps."); }
+    }
+    paragraph(stop, "If there is an immediate danger to people, follow emergency safety procedures first.", "draft-safety");
+
+    const reportStep = section(2, "Report It", "Call the right people immediately so they can help your organization respond.");
+    const urgent = el("p", undefined, "draft-urgent");
+    urgent.append(el("strong", "For urgent problems, call by phone. "), report.ownerDocument.createTextNode("Email may not work, or the attacker may be able to read it. Use email only for non-urgent reports.")); reportStep.append(urgent);
+    if (a.reportingMethod === "Email") paragraph(reportStep, "Your organization usually reports problems by email. In an emergency, call instead.");
+    else if (a.reportingMethod === "In Person") paragraph(reportStep, "If your contact is nearby, you can also tell them in person.");
+    else if (a.reportingMethod === "Other") blank(reportStep, "Your organization's usual reporting method");
+    else if (a.reportingMethod === "Not Established") {
+        paragraph(reportStep, "Your organization has not chosen a reporting method yet. Until it does, call your main contact.");
+        missing.add("Choose a usual reporting method.");
+    } else if (a.reportingMethod !== "Phone") {
+        blank(reportStep, "Usual reporting method — confirm"); missing.add("Confirm the usual reporting method.");
+    }
+    reportStep.append(el("h3", "A. Call right away"));
+    const calls = checks(reportStep);
+    if (contact) item(calls, "Call " + contact + ".", [["Phone"]]);
+    else { item(calls, "No main contact is assigned yet.", [["Main contact name"], ["Phone"]]); missing.add("Assign a main contact."); }
+    if (a.alternateContact === "Yes") item(calls, "If your main contact doesn't answer, call your backup contact.", [["Backup contact name"], ["Phone"]]);
+    else if (a.alternateContact === "No") {
+        item(calls, "No backup contact is assigned. Choose one before an emergency.", [["Backup contact name"], ["Phone"]]); missing.add("Choose a backup contact.");
+    } else { item(calls, "Check whether your organization has a backup contact.", [["Backup contact name"], ["Phone"]]); missing.add("Confirm a backup contact."); }
+    if (a.itSupport === "Internal IT Team") item(calls, "Call " + it + ".", [["Phone"]]);
+    else if (a.itSupport === "External IT Provider") item(calls, "Call " + it + ".", [["Company"], ["Phone"]]);
+    else if (a.itSupport === "Office Manager") item(calls, "Call " + it + ". Your Office Manager should arrange help from a trusted IT professional if needed.", [["Phone"]]);
+    else {
+        item(calls, (a.itSupport === "No IT Support" ? "No IT support is listed. " : "IT support is not confirmed. ") + "Call " + it + ". Your manager should arrange help from a trusted IT professional.", [["IT professional"], ["Phone"]]);
+        missing.add(a.itSupport === "No IT Support" ? "Arrange trusted IT help." : "Confirm IT support.");
+    }
+    item(calls, "Call your incident coordinator or manager. This may be a different person from your main contact.", [["Coordinator or manager name"], ["Phone"]]);
+    reportStep.append(el("h3", "B. What to tell them"));
+    const tell = el("ul", undefined, "draft-tell");
+    ["What happened?", "When did you notice it?", "Which computer, account, or system is affected?", "Are you seeing any warning messages?"].forEach(text => tell.append(el("li", text))); reportStep.append(tell);
+    paragraph(reportStep, "Your incident coordinator or " + it + " will check how serious the problem is.");
+
+    const leadership = el("div", undefined, "draft-leadership"); reportStep.append(leadership);
+    leadership.append(el("h3", "C. Leadership decides"));
+    paragraph(leadership, "Not every problem needs every report below. Your leadership decides which ones apply.");
+    const leadershipList = checks(leadership);
+    item(leadershipList, "Cyber insurance provider, if you have one.", [["Company"], ["Policy number"], ["Phone"]]);
+    const cisa = item(leadershipList, "Report to CISA (U.S. Cybersecurity and Infrastructure Security Agency): ");
+    const cisaLink = el("a", "cisa.gov/report"); cisaLink.href = "https://www.cisa.gov/report";
+    cisa.append(cisaLink, report.ownerDocument.createTextNode(" or (888) 282-0870"));
+    const fbi = item(leadershipList, "Report internet crime to the FBI: ");
+    const fbiLink = el("a", "ic3.gov"); fbiLink.href = "https://www.ic3.gov/"; fbi.append(fbiLink);
+    if (a.sensitiveData === "Yes") paragraph(leadership, "Personal or financial information may be involved. Leadership should get legal advice about who must be told.");
+    else if (a.sensitiveData !== "No") {
+        paragraph(leadership, "Find out whether personal or financial information may be involved.");
+        blank(leadership, "Personal or financial information — confirm"); missing.add("Confirm whether personal or financial information is involved.");
+    }
+
+    const recover = section(3, "Recover and Follow Up", "Work with the people responsible for your systems to restore normal operations safely.");
+    const recoveryList = checks(recover);
+    if (["Email", "Financial Systems", "Customer Records", "Shared Files", "Website"].includes(a.criticalSystems)) item(recoveryList, "Check whether your " + a.criticalSystems + " is affected.");
+    else if (a.criticalSystems === "Other") item(recoveryList, "Check whether your most important system is affected.", [["System"]]);
+    else { item(recoveryList, "Check which important systems are affected.", [["List important systems"]]); missing.add("Identify important systems."); }
+    item(recoveryList, "Work with " + it + " to make sure the problem has stopped before restoring anything.");
+    if (a.backups === "No") item(recoveryList, "Your organization has no backups. Ask " + it + " about other ways to recover.");
+    else if (a.backups !== "Yes") {
+        item(recoveryList, "Find out whether your organization has backups before planning recovery.", [["Backups available — confirm"]]); missing.add("Confirm whether backups exist.");
+    } else if (a.backupTesting === "Yes") item(recoveryList, "Check that your backups are safe before using them. They have been tested before.");
+    else if (a.backupTesting === "No") {
+        const warning = item(recoveryList, ""); warning.append(el("strong", "Your backups have never been tested. They may not work. "), report.ownerDocument.createTextNode("Do not count on them until " + it + " checks them."));
+    } else {
+        item(recoveryList, "It is not known whether your backups have been tested. Ask " + it + " to check them before using them.", [["Backup testing — confirm"]]); missing.add("Confirm whether backups have been tested.");
+    }
+    item(recoveryList, "Restore important systems only after " + it + " says it is safe.");
+    if (a.itSupport === "No IT Support" || !itPhrases[a.itSupport]) paragraph(recover, "Your manager should arrange help from a trusted IT professional before restoring anything.");
+    if (a.recoveryCommunication === "Yes") item(recoveryList, "Tell employees what is working and what they should do next. Use your usual process to update employees.");
+    else {
+        item(recoveryList, "Tell employees what is working and what they should do next. Choose who will update employees and how. If email is down, use phone or text.", [["Person"], ["Method"]]);
+        if (!["No", "Partially"].includes(a.recoveryCommunication)) missing.add("Confirm how employees will receive updates.");
+    }
+    item(recoveryList, "Write down what happened and what your organization can do better next time.");
+    if (a.recoveryProcedures === "Yes") {
+        const line = paragraph(recover, "Follow your written recovery steps."); blank(line, "Where to find them");
+    } else if (a.recoveryProcedures === "Partially") paragraph(recover, "Your written recovery steps are not finished. Ask " + it + " to help with the missing parts.");
+    else {
+        paragraph(recover, "There are no known written recovery steps. " + it[0].toUpperCase() + it.slice(1) + " should guide the recovery.");
+        if (a.recoveryProcedures !== "No") { blank(recover, "Written recovery steps — confirm"); missing.add("Confirm written recovery steps."); }
+    }
+    const complete = el("aside", undefined, "draft-complete"); complete.append(el("h3", "Still to Complete"));
+    if (missing.size) {
+        const list = el("ul"); missing.forEach(text => list.append(el("li", text))); complete.append(list);
+    }
+    else paragraph(complete, "Fill in all phone numbers above before printing.");
+    report.append(complete);
 }
