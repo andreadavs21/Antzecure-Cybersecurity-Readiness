@@ -461,3 +461,75 @@ footer p { margin: 0; }
 @media (max-width: 600px) { .resource-incidentPlan .draft-complete ul { grid-template-columns: 1fr; } }
 @media print { .resource-incidentPlan .draft-complete ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .resource-incidentPlan .draft-field .resource-label::after { content: ":"; }
+
+/* Interactive tabletop features stay inside the existing standalone exercise view. */
+.resource-tabletop .tabletop-controls { margin: 20px 0; padding: 18px; border: 1px solid var(--border); border-radius: 8px; }
+.resource-tabletop .tabletop-controls label { display: block; font-weight: 700; margin-bottom: 8px; }
+.resource-tabletop .tabletop-controls select { width: 100%; }
+.resource-tabletop .tabletop-controls p { font-size: 13px; color: var(--muted); margin-bottom: 0; }
+.resource-tabletop .tabletop-opening { font-size: 16px; line-height: 1.6; }
+.resource-tabletop .tabletop-print { display: none; }
+.resource-tabletop .tabletop-words { border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-top: 20px; }
+.resource-tabletop .tabletop-words h3 { margin: 0 0 8px; font-size: 15px; }
+.resource-tabletop .tabletop-words ul { font-size: 12px; padding-left: 18px; margin: 0; }
+.resource-tabletop .exercise-part { padding: 18px 0; border-bottom: 1px solid var(--border); }
+.resource-tabletop .tabletop-questions { font-size: 14px; }
+.resource-tabletop .tabletop-suggestions { margin-top: 16px; }
+.resource-tabletop .tabletop-hints, .resource-tabletop .tabletop-feedback { padding: 14px 16px; margin-top: 12px; border: 1px solid var(--border); border-left: 3px solid var(--navy); border-radius: 6px; background: #f7f8fa; font-size: 13px; }
+.resource-tabletop .tabletop-hints h4 { margin: 0 0 8px; font-size: 14px; }
+.resource-tabletop .tabletop-decision { min-width: 0; padding: 16px; margin: 18px 0; border: 1px solid var(--border); border-radius: 8px; }
+.resource-tabletop .tabletop-decision legend { float: none; max-width: 100%; padding: 0 7px; font-size: 14px; font-weight: 700; }
+.resource-tabletop .tabletop-decision > p { font-size: 12px; }
+.resource-tabletop .tabletop-choices { display: grid; gap: 10px; }
+.resource-tabletop .tabletop-choices button { width: 100%; text-align: left; white-space: normal; padding: 12px 14px; color: var(--navy); background: white; border: 1px solid var(--border); line-height: 1.5; }
+.resource-tabletop .tabletop-choices button[aria-pressed="true"] { border: 2px solid var(--navy); background: #edf1f6; }
+.resource-tabletop .tabletop-recommended { font-weight: 700; }
+.resource-tabletop .tabletop-optional { padding: 12px 14px; margin-top: 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+.resource-tabletop .tabletop-optional summary { cursor: pointer; font-weight: 700; }
+.resource-tabletop .tabletop-answer-block { margin: 18px 0; font-size: 13px; }
+@page tabletop-exercise { size: auto; margin: 14mm; }
+@media print {
+    .resource-tabletop { page: tabletop-exercise; }
+    .resource-tabletop .tabletop-screen { display: none !important; }
+    .resource-tabletop .tabletop-print { display: block; }
+    .resource-tabletop .tabletop-opening { font-size: 11pt; }
+    .resource-tabletop .exercise-safety { padding: 10px; font-size: 10pt; }
+    .resource-tabletop .exercise-context { gap: 10px 20px; }
+    .resource-tabletop .exercise-context dt { font-size: 9pt; }
+    .resource-tabletop .exercise-context dd { font-size: 9pt; line-height: 1.35; }
+    .resource-tabletop .tabletop-words { padding: 10px 12px; break-inside: avoid; }
+    .resource-tabletop .tabletop-words ul { font-size: 9pt; }
+    .resource-tabletop .exercise-part { padding: 12px 0; }
+    .resource-tabletop .tabletop-decision { padding: 10px; break-inside: avoid; }
+    .resource-tabletop .tabletop-decision legend { font-size: 10pt; }
+    .resource-tabletop .tabletop-paper-choices { list-style: none; margin: 5px 0; padding-left: 0; font-size: 10pt; }
+    .resource-tabletop .tabletop-paper-choices li { position: relative; padding-left: 18px; margin: 7px 0; break-inside: avoid; }
+    .resource-tabletop .tabletop-paper-choices li::before { content: ""; width: 9px; height: 9px; border: 1px solid var(--navy); position: absolute; left: 0; top: 0.25em; }
+    .resource-tabletop .tabletop-answer-guide { break-before: page; page-break-before: always; }
+    .resource-tabletop .tabletop-answer-guide h3, .resource-tabletop .tabletop-answer-guide h4 { break-after: avoid; }
+    .resource-tabletop .tabletop-answer-block { font-size: 10pt; break-inside: avoid; }
+    .resource-tabletop .tabletop-answer-block ul { padding-left: 18px; }
+}
+@media print {
+    .resource-tabletop .exercise-part { padding: 6px 0; margin-bottom: 4px; break-inside: auto; page-break-inside: auto; }
+    .resource-tabletop .exercise-part h3 { margin: 4px 0 6px; }
+    .resource-tabletop .tabletop-questions { margin: 5px 0; break-inside: avoid; }
+    .resource-tabletop .tabletop-decision { margin: 9px 0; padding: 8px; }
+    .resource-tabletop .exercise-complication { padding: 8px 10px; margin: 6px 0; }
+}
+@media print {
+    .resource-tabletop .report-header { padding-bottom: 12px; }
+    .resource-tabletop .report-header h1 { font-size: 18pt; }
+    .resource-tabletop .report-header img { height: 40px; }
+    .resource-tabletop .report-metadata { padding: 10px 0; }
+    .resource-tabletop .tabletop-scenario { margin-top: 14px; }
+    .resource-tabletop .tabletop-scenario > h2 { font-size: 15pt; margin-bottom: 10px; padding-bottom: 6px; }
+    .resource-tabletop .tabletop-scenario > p { margin: 8px 0; }
+    .resource-tabletop .exercise-context { margin-top: 12px; gap: 6px 20px; }
+    .resource-tabletop .tabletop-words { margin-top: 12px; padding: 8px 10px; }
+    .resource-tabletop .tabletop-answer-block { break-inside: auto; }
+    .resource-tabletop .tabletop-answer-block li { break-inside: avoid; }
+    .resource-tabletop .tabletop-recommended { break-after: avoid; }
+}
+@media print { .resource-tabletop .tabletop-decision-key { break-inside: avoid; } }
+@media print { .resource-tabletop .tabletop-answer-decision { break-inside: avoid; } }
