@@ -70,3 +70,54 @@ Chromium exports do not establish Safari print-dialog behavior.
 The resource key and openPreparednessResource print flow are unchanged. renderIncidentPlan
 uses the submitted answers and existing contact/field helpers. The dormant full plan
 renderer remains available for future expansion but is not exposed by this download.
+
+Personalized 20-minute tabletop exercise
+---------------------------------------
+
+With the same server and dependencies, run:
+
+    node tests/tabletop.cjs
+
+The exercise uses the latest submitted assessment. Its scenario library is the ordered
+`tabletopScenarios` array in script.js. First match wins: no/unknown backups → Ransomware;
+otherwise Email reporting → Email Account Takeover; otherwise Financial Systems →
+Payment Fraud; otherwise sensitive information Yes → Sensitive Information Exposure;
+otherwise Phishing. These rules choose practice material, not recommendation priorities.
+
+The browser suite checks all five stories with each of three organization profiles
+(no IT/no backups, external IT/email, internal IT/tested backups/written plan). It checks
+selection precedence, manual switching without assessment changes, four sections totaling
+20 minutes, 2–4 hidden guidance points per section, mouse and keyboard reveal controls,
+changeable A/B/C answers, all consequences, safe handling of free text and missing details,
+mobile width, PDF answer-key separation and the other resources. Generated PDFs are in
+the temporary directory printed by the test. Native Safari printing is a manual check;
+Linux Chromium exports do not establish Safari print-dialog behavior.
+
+Manual scenario and printing checks:
+
+1. Submit an assessment, open Practice Your Response — 20-Minute Exercise, and confirm
+   the recommended default matches the rules above. There is no need to resubmit to
+   select another story.
+2. Use Choose a Practice Scenario to try all five stories. Check that the opening,
+   Step 3 development, optional second development, decision and suggested answers
+   change together. The organization summary should stay the same.
+3. Confirm the four sections are 3, 5, 7 and 5 minutes. The optional development replaces
+   another Step 3 question if used; it does not extend the time.
+4. Reveal and hide Suggested Answers using mouse, Tab, Enter and Space. Select A/B/C,
+   change the selection, and check that all three consequences and a text/check-mark
+   recommended answer appear. No answer should prevent continuing.
+5. In Chrome and Safari, use Print / Save as PDF. Open some suggested answers first and
+   choose a decision answer, then check the print preview: controls, selections and inline
+   answers must disappear. Participant A/B/C choices should have empty boxes.
+6. Confirm the worksheet follows participant discussion pages and the Facilitator Answer
+   Guide starts on a new page after it, with all four sets of answers, consequences,
+   the lesson and optional development. A facilitator can keep these final pages separate.
+7. Check the safety reminder, readable text, page breaks and all pages for clipping or
+   blank sheets. Save/reopen the PDF and confirm the selected story and organization.
+8. Recheck the Recommendations PDF, Contact Card, Incident Response Plan, questionnaire
+   navigation/progress and Your First Steps. Nothing in the exercise should change answers.
+
+All activities are discussion-only: no network calls, payments, account changes or live
+security actions are attached to exercise controls. Choices and scenario selections stay
+in the resource tab and are not saved. The worksheet remains a printable writing sheet.
+Optional mock props were left out to keep the focus on stories, decisions and guidance.

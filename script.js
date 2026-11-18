@@ -582,72 +582,313 @@ function renderRoadmap(context) {
     });
 }
 
-function buildTabletopScenario(answers) {
-    const scenarios = {
-        "Email": "An employee receives an unexpected email asking them to sign in. They then notice that they cannot access their email account. Discuss what you would do if someone else might have accessed the account.",
-        "Financial Systems": "Someone notices a payment they do not recognize in the organization's financial system. They are unsure whether it was approved, and access to the system becomes unavailable. Discuss how to report and check the problem.",
-        "Customer Records": "A person who normally uses the customer records system cannot open it and sees an unfamiliar sign-in notice. Discuss how to respond to possible access by someone who should not have it; do not assume information was exposed.",
-        "Shared Files": "An employee tries to open important shared files, but the files are unavailable. They do not yet know why. Discuss how your team would report the problem and keep essential work going.",
-        "Website": "Someone notices that the organization's website is showing an unexpected page instead of its normal content. Discuss how your team would check the report and respond while the website is unavailable."
-    };
-    return scenarios[answers.criticalSystems] || "Generic practice scenario — the assessment did not name a specific critical system. Imagine that an important work application is unavailable and an employee is unsure why. Choose an example together for this discussion; no particular application is assumed to exist in your organization.";
+// One ordered library owns the stories, practice choices and teaching points.
+// recommendedWhen rules choose training material, never change assessment findings.
+const tabletopScenarios = [
+    {
+        id: "ransomware", title: "Ransomware",
+        recommendedWhen: a => a.backups === "No" || a.backups === "Not Sure",
+        opening: "An employee tries to open an important file, but it will not open. A message appears saying the organization's files are locked and money must be paid to unlock them.",
+        development: "Another employee sees the same locked-file message on their computer. The person in charge asks how the team would limit the spread during a real incident.",
+        optionalDevelopment: "The person who checks backups is away today. The group must identify who else could confirm whether safe copies exist.",
+        recognition: "A locked-file message demanding money can be a sign of ransomware. Treat this as a practice story, not proof that your own files are affected.",
+        nextQuestions: ["During a real incident, who could guide staff in disconnecting only affected individual devices safely?", "How would your team check safe recovery options without paying a demand?", "What work would need another safe way to continue?"],
+        nextAnswers: ["During a real incident, the team would seek safe instructions for affected individual devices and leave shared equipment to trusted IT help.", "A money demand needs leadership review. Paying does not promise that files will come back."],
+        lesson: "Know whom to call and check backup readiness before a real locked-file emergency.",
+        decision: { step: 3, situation: "In this fictional story, a locked-file message demands payment. What would your team discuss doing next?", recommended: 1,
+            options: [
+                { text: "Pay the demand at once to try to get files back.", consequence: "Payment may lose money without bringing files back." },
+                { text: "Ask the person in charge and trusted IT help to plan safe next steps and check recovery options.", consequence: "This brings the right people into the decision and avoids rushed payment or risky changes." },
+                { text: "Try several fixes or switch off shared equipment without asking.", consequence: "Unplanned changes may spread harm, lose useful clues or interrupt other people's work." }
+            ], lesson: "During a real incident, get trusted help before changing shared equipment or deciding about money." }
+    },
+    {
+        id: "email-takeover", title: "Email Account Takeover",
+        recommendedWhen: a => a.reportingMethod === "Email",
+        opening: "A staff member discovers that emails were sent from their work account without their permission. Some of those emails ask vendors to change payment information.",
+        development: "A vendor phones to ask whether one of those emails is genuine. The staff member still does not know who can read or send messages from the account.",
+        optionalDevelopment: "The team finds more suspicious messages in the account's sent folder. Discuss who would approve contacting the people who received them.",
+        recognition: "Messages sent without the account owner's permission may mean someone else has access. This story concerns one email account; it does not establish that a payment was made.",
+        nextQuestions: ["How would your team reach people without using the affected email account?", "Who would approve warning people who received the messages?", "Who would ask trusted IT help to check the account during a real incident?"],
+        nextAnswers: ["A known phone number is safer than replying through an email account someone else may control.", "During a real incident, trusted IT help would check account access; a named manager would approve messages to affected people."],
+        lesson: "Use trusted phone contacts when an email account may be under someone else's control.",
+        decision: { step: 2, situation: "A vendor asks about a payment-change email sent from the affected account. Which response would your team choose in this discussion?", recommended: 1,
+            options: [
+                { text: "Reply from the same email account to say everything is fine.", consequence: "Someone else may still read or send messages from that account." },
+                { text: "Discuss calling the vendor on a number already trusted and involving the person in charge.", consequence: "A known number helps the team check the message without relying on the affected email account." },
+                { text: "Forward the suspicious email to everyone without checking first.", consequence: "This may spread harmful content or private information and confuse recipients." }
+            ], lesson: "A familiar email address alone does not prove who sent a message." }
+    },
+    {
+        id: "payment-fraud", title: "Payment Fraud",
+        recommendedWhen: a => a.criticalSystems === "Financial Systems",
+        opening: "Your organization receives a message from someone claiming to be a regular vendor. The message asks you to send future payments to a different bank account.",
+        development: "The message says the change is urgent and asks the bookkeeper not to phone the vendor. No payment has been made in this practice story.",
+        optionalDevelopment: "For a second discussion, imagine a payment was already sent before anyone checked. Who would contact the bank's fraud team promptly, using a trusted number?",
+        recognition: "An unexpected bank-account change needs a careful check, even when a vendor's name looks familiar. The story is about a payment request, not a system outage.",
+        nextQuestions: ["How would your team check a bank-account change using a number it already trusts?", "Who has authority to approve a payment or pause it for review?", "If money had already been sent, who would contact the bank promptly?"],
+        nextAnswers: ["A payment change needs a check using contact details already on file, not details in the new message.", "If a fraudulent payment had already happened, the team would ask its bank for help promptly and tell the person in charge."],
+        lesson: "Check unusual payment requests using contact information your team already trusts.",
+        decision: { step: 2, situation: "The vendor name looks familiar, but the message asks for a new bank account. What would your team choose?", recommended: 1,
+            options: [
+                { text: "Send the payment because the vendor name looks familiar.", consequence: "A familiar name can be copied. The payment could go to a scammer." },
+                { text: "Discuss calling the vendor using a phone number your organization already trusts.", consequence: "A trusted number helps confirm whether the request is real before money moves." },
+                { text: "Reply to the message to ask whether the new bank details are correct.", consequence: "If a scammer controls the message, they can reply and continue the trick." }
+            ], lesson: "Verify unusual payment requests using a known phone number, not the new message." }
+    },
+    {
+        id: "data-exposure", title: "Sensitive Information Exposure",
+        recommendedWhen: a => a.sensitiveData === "Yes",
+        opening: "An employee reports that a work laptop containing sensitive information has gone missing. The team is unsure whether anyone else can access the information.",
+        development: "The employee remembers that the laptop may hold customer and employee records. Nobody has confirmed whether anyone opened them.",
+        optionalDevelopment: "A customer asks whether their information was exposed. Discuss who could check the facts and approve a careful reply without guessing.",
+        recognition: "A missing device may put information at risk, but it does not prove anyone saw it. Use made-up records only in this discussion.",
+        nextQuestions: ["How would your team find out what information might be on the missing laptop?", "Who would get IT and legal advice before deciding whom to tell?", "What could your team say while the facts are still unknown?"],
+        nextAnswers: ["The team would identify the kinds of information on the laptop without sharing real records in the exercise.", "Leadership would seek IT and legal advice about needed notices and deadlines, rather than announcing a breach without facts."],
+        lesson: "Report a lost device promptly, check the facts and get advice before making claims about exposed information.",
+        decision: { step: 3, situation: "Someone asks whether all customer records were stolen from the missing laptop. The team does not know yet. Which answer would it discuss?", recommended: 1,
+            options: [
+                { text: "Announce that all records were stolen.", consequence: "That claim is not supported by the facts and may cause avoidable fear." },
+                { text: "Explain that the facts need checking and ask leadership to get IT and legal advice.", consequence: "This avoids guessing while allowing the right people to assess notices and deadlines." },
+                { text: "Assume nothing happened and avoid telling the person in charge.", consequence: "Delay may prevent the team from checking the risk and meeting any reporting duties." }
+            ], lesson: "A missing laptop needs prompt review; it does not automatically prove a data breach." }
+    },
+    {
+        id: "phishing", title: "Phishing",
+        recommendedWhen: () => true,
+        opening: "An employee clicks a link in an email and enters their work password on a website. Later, they realize the website may have been fake.",
+        development: "The employee receives an unexpected sign-in alert for the same account. The team must discuss how it would report this and ask for help.",
+        optionalDevelopment: "The fake email appears in another colleague's inbox. Discuss who could warn staff without forwarding the harmful link.",
+        recognition: "A fake sign-in page can trick someone into sharing a password. Reporting a mistake quickly helps the team respond; blame can make people stay quiet.",
+        nextQuestions: ["During a real incident, who would arrange safe help to protect the account?", "How would trusted IT help check for unusual account use?", "Who would approve a staff warning without forwarding the suspicious link?"],
+        nextAnswers: ["During a real incident, trusted help would guide account protection and check unusual activity. No one changes passwords in this exercise.", "Staff warnings would use a safe description, not a forwarded harmful link."],
+        lesson: "Report a suspected fake sign-in quickly and ask for safe help without blaming the person who clicked.",
+        decision: { step: 3, situation: "The employee entered a password on a page that may be fake. Which next step would your team discuss?", recommended: 1,
+            options: [
+                { text: "Open the page again to investigate it alone.", consequence: "More contact with the page may create further risk and is not needed for reporting." },
+                { text: "Discuss reporting promptly and asking trusted help to protect and check the account.", consequence: "Prompt reporting gives the right people a chance to check account use and guide safe steps." },
+                { text: "Wait quietly to see if anything else happens.", consequence: "Delay may give someone more time to misuse the account." }
+            ], lesson: "A quick, blame-free report is safer than investigating a suspicious page yourself." }
+    }
+];
+
+function recommendTabletopScenario(answers) {
+    return tabletopScenarios.find(scenario => scenario.recommendedWhen(answers));
 }
 
-function buildExerciseComplication(answers) {
-    const complications = {
-        "Email": "The email account is still unavailable, and a colleague asks how to send an urgent update.",
-        "Financial Systems": "The financial system is still unavailable, and someone needs to know how an important payment will be handled.",
-        "Customer Records": "The records system is still unavailable, and someone asks whether any information was shared without permission; the team does not yet know.",
-        "Shared Files": "The shared files are still unavailable, and an employee needs information from them to finish an important task.",
-        "Website": "The website is still unavailable, and someone asks whether normal services are continuing."
-    };
-    const complication = complications[answers.criticalSystems] || "The work application remains unavailable, and someone asks for an update on an important task.";
-    return complication + (answers.reportingMethod === "Email" ? " The usual email reporting route may also be affected; discuss which approved alternative you could use." : " Discuss how to give accurate updates without guessing when service will return.");
+function buildTabletopScenario(answers, scenarioId) {
+    return (tabletopScenarios.find(scenario => scenario.id === scenarioId) || recommendTabletopScenario(answers)).opening;
+}
+
+function buildExerciseComplication(answers, scenarioId, optional = false) {
+    const scenario = tabletopScenarios.find(scenario => scenario.id === scenarioId) || recommendTabletopScenario(answers);
+    return optional ? scenario.optionalDevelopment : scenario.development;
+}
+
+// Shared assessment wording never invents a responder, contact, procedure or backup.
+function buildTabletopContext(answers) {
+    const a = answers;
+    const contact = knownResourceValue((a.emergencyContact || "").trim());
+    const system = knownResourceValue(a.criticalSystems);
+    const support = a.itSupport === "Internal IT Team" ? "Your assessment lists an internal IT team. Identify who would help and how to reach them."
+        : a.itSupport === "External IT Provider" ? "Your assessment lists an external IT provider. Identify the company and a trusted phone number."
+        : a.itSupport === "Office Manager" ? "Your Office Manager handles IT matters. Discuss when they would arrange help from a trusted IT professional."
+        : a.itSupport === "No IT Support" ? "No IT support is listed. Decide who would contact an outside IT professional if a serious problem occurred."
+        : "IT support is not confirmed. Identify who could arrange trusted help.";
+    const backup = a.backups === "No" ? "Your organization does not currently report having backups. Add setting up backups to your improvement list."
+        : a.backups !== "Yes" ? "Backup availability is unknown. Identify who would check whether separate copies exist before planning to use them."
+        : a.backupTesting === "Yes" ? "Backups have been tested according to your assessment. Discuss who would check that current copies are safe and usable in a real incident."
+        : a.backupTesting === "No" ? "Your assessment says backups have not been tested. Discuss who could check whether important files can be restored safely."
+        : "Backups are reported, but testing is not confirmed. Identify who would check them before relying on them.";
+    const plan = a.existingPlan === "No" ? "Your organization does not have written response instructions yet. Write down the decisions your team makes during this exercise."
+        : a.existingPlan === "Yes" ? "A written response plan is reported. Discuss where it is kept and whether it covers this story."
+        : a.existingPlan === "Partially" ? "Your written response instructions are partly complete. Record which missing steps this discussion reveals."
+        : "Written response instructions are not confirmed. Identify who would find or help write them.";
+    const reporting = a.reportingMethod === "Email" ? "If email is not working or someone else may have access to it, your team needs another way to communicate. Decide which trusted phone number employees would call."
+        : a.reportingMethod === "Phone" ? "Your team reports problems by phone. Identify a trusted number and a backup if nobody answers."
+        : a.reportingMethod === "In Person" ? "Your team reports problems in person. Discuss another way to reach the contact if they are away."
+        : a.reportingMethod === "Other" ? "Your assessment lists another reporting method without details. Identify that method and a backup during the discussion."
+        : "No reporting method is confirmed. Agree how employees would report a problem and list this as an improvement.";
+    const alternate = a.alternateContact === "Yes" ? "An alternate contact is reported. Identify their name and how to reach them if the main contact is away."
+        : a.alternateContact === "No" ? "No alternate contact is reported. Agree who could take over when the main contact is unavailable."
+        : "It is not known whether there is an alternate contact. Ask the group to identify one.";
+    const update = a.recoveryCommunication === "Yes" ? "A staff-update process is reported. Discuss who would use it to share facts, and when the next update would be."
+        : a.recoveryCommunication === "Partially" ? "Staff-update plans are partly complete. Agree who would send updates and how to reach staff if email is down."
+        : "Staff-update plans are not confirmed or not in place. Choose who would give updates and another way to reach staff, such as a phone call.";
+    const recovery = a.recoveryProcedures === "Yes" ? "Written recovery steps are reported. Discuss whether they fit this story; do not assume every problem uses the same steps."
+        : a.recoveryProcedures === "Partially" ? "Written recovery steps are partly complete. Record missing steps this story helps the team notice."
+        : "Written recovery steps are not confirmed or not in place. List who would help plan a safe return to normal work.";
+    const severity = a.incidentSeverity === "Yes" ? "A way to judge seriousness is reported. Discuss who would check the impact and tell the person in charge."
+        : "A complete way to judge seriousness is not confirmed. Agree who would check the effect on people, information and daily work.";
+    const practice = a.responseExercises === "Yes" ? "Your team reports past exercises. Compare what improved and set a date to practice again."
+        : a.responseExercises === "No" ? "Your team reports no earlier exercises. Treat this practice as a useful first step and choose a date to repeat it."
+        : "Earlier practice is not confirmed. Record today's lessons and choose a date to practice again.";
+    const device = a.deviceIsolation === "Yes" ? "Approved device-disconnect steps are reported. Discuss where they are kept; do not use them on real devices in this exercise."
+        : "Approved device-disconnect steps are not confirmed or not in place. Discuss who could provide safe instructions during a real incident; do not disconnect anything now.";
+    const sensitive = a.sensitiveData === "Yes" ? "Sensitive information is reported. Think about who should be contacted if customer, employee or financial information might be exposed. Use made-up records only."
+        : a.sensitiveData === "No" ? "No sensitive information was reported. Use made-up details in the story and discuss whether any information would need protection."
+        : "Sensitive information handling is unknown. Identify who could check; do not read or copy real records during practice.";
+    return { contact, system, support, backup, plan, reporting, alternate, update, recovery, severity, practice, device, sensitive };
+}
+
+function buildTabletopSteps(answers, scenario) {
+    const c = buildTabletopContext(answers);
+    return [
+        { title: "Understand the Problem", minutes: 3,
+            questions: ["What happened in this practice story?", c.system ? "Your assessment lists " + c.system + " as your critical system. Which work using it might this story affect, if any?" : "Your critical system is not named. Which tool does your team need most, and might this story affect it?", "What facts would your team check before deciding how serious the problem is?"],
+            guidance: [scenario.recognition, c.system ? "Keep the discussion tied to the work that depends on " + c.system + ". Do not assume it is affected without checking the facts in the story." : "Name the tools your team relies on. An unknown detail is useful to record, not a wrong answer.", c.severity, c.sensitive] },
+        { title: "Who Do We Contact?", minutes: 5,
+            questions: [c.contact ? "Your assessment lists " + c.contact + " as your emergency contact. How would your team reach this person?" : "No emergency contact is named. Who could employees contact during a security problem?", answers.reportingMethod === "Email" ? "Your usual reporting method is email. How would your team reach trusted help if that account could not be used?" : "How would your team use its reporting method and reach a backup contact?", answers.itSupport === "No IT Support" ? "With no IT support listed, who would arrange trusted outside help during a real incident?" : "Who would contact the person who helps fix your computers, and how?"],
+            guidance: [c.contact ? "Confirm how to reach " + c.contact + "; the assessment supplies no phone number or decision-making authority." : "Choose a person employees can contact during a cybersecurity emergency.", c.reporting, c.support, c.alternate] },
+        { title: "What Happens Next?", minutes: 7, questions: scenario.nextQuestions,
+            guidance: scenario.id === "ransomware" ? [scenario.nextAnswers[0], c.backup, c.device, c.update] : [...scenario.nextAnswers, c.recovery, c.update] },
+        { title: "What Did We Learn?", minutes: 5,
+            questions: ["What went well?", "What was confusing?", "What needs improvement?", "Who will own each improvement, and when will they check progress?"],
+            guidance: [c.plan, c.practice, "Record one clear action, an owner and a target date. Finding a gap is a useful result of practice, not a failure.", scenario.lesson] }
+    ];
 }
 
 function renderTabletop(context) {
-    const { element, report, snapshot } = context;
+    const { element: el, report, snapshot } = context;
     const a = snapshot.answers;
-    const scenario = element("section", undefined, "tabletop-scenario");
-    scenario.append(element("h2", "Your practice scenario"), element("p", "This is a fictional practice situation, not a report of an actual incident."), element("p", buildTabletopScenario(a)));
-    scenario.append(element("p", "Talk through your decisions only. Do not turn off real systems, change passwords, open suspicious links, or change work applications during this exercise. No special software or technical experience is needed.", "exercise-safety"));
-    const details = element("dl", undefined, "exercise-context");
-    const backupText = a.backups === "No" ? "No backups reported: do not assume that separate copies of files are available to restore." : a.backups === "Not Sure" ? "Backup availability is unknown: identify who will check whether separate copies of files exist." : "Backups reported: separate copies of important files are available according to the assessment; restoration testing was answered “" + a.backupTesting + "”. Discuss who would check that copies can actually be used.";
-    const supportText = a.itSupport === "No IT Support" ? "No dedicated technology support reported. Discuss who can arrange qualified help; do not assume a provider is already available." : a.itSupport === "External IT Provider" ? "An outside technology-support provider is reported. Confirm how to reach the provider; no provider name or phone number was supplied in the assessment." : a.itSupport === "Internal IT Team" ? "An internal technology-support team is reported. Discuss who from that team should be contacted." : "The Office Manager is reported as responsible for technology support. Discuss when qualified technical help should be arranged.";
-    const planText = a.existingPlan === "Yes" ? "A written incident response plan is reported: bring the guide describing what to do during a security problem." : a.existingPlan === "No" ? "No written incident response plan is reported: record unclear decisions as improvements rather than assuming instructions exist." : a.existingPlan === "Partially" ? "A written response guide is partly complete: use available instructions and note what is missing." : "It is not known whether a written response guide exists: identify who will check.";
-    const reportingText = a.reportingMethod === "Not Established" ? "No reporting method has been established. Discuss how to agree one and record this as an improvement." : a.reportingMethod === "Other" ? "Other reporting method selected, without details. Ask the group to identify the actual method before relying on it." : a.reportingMethod;
-    [["Important system selected", a.criticalSystems], ["Technology support", supportText], ["Emergency contact", knownResourceValue(a.emergencyContact) || "Not assigned or unknown — agree who should be contacted."], ["How to report the problem", reportingText], ["Backups — separate copies of files", backupText], ["Written response guide", planText]].forEach(([label, value]) => {
-        const item = element("div");
-        item.append(element("dt", label), element("dd", value));
-        details.append(item);
+    const c = buildTabletopContext(a);
+    const recommended = recommendTabletopScenario(a);
+    const controls = el("div", undefined, "tabletop-controls tabletop-screen");
+    const label = el("label", "Choose a Practice Scenario");
+    const select = el("select"); select.id = "tabletopScenario"; label.htmlFor = select.id;
+    select.setAttribute("aria-describedby", "tabletopScenarioHelp");
+    tabletopScenarios.forEach(scenario => {
+        const option = el("option", scenario.title); option.value = scenario.id; select.append(option);
     });
-    scenario.append(details);
-    if (a.sensitiveData === "Yes" || a.sensitiveData === "Not Sure") scenario.append(element("p", a.sensitiveData === "Yes" ? "Sensitive information is reported. Use made-up examples in this exercise; do not read out or copy real personal, customer, employee, or financial records." : "The assessment did not confirm whether sensitive information is held. Note who will check; do not assume that no personal or financial information is involved.", "exercise-privacy"));
-    const facilitator = element("section", undefined, "facilitator-guide");
-    facilitator.append(element("h2", "Simple facilitator guide — 20 minutes"), element("p", "Choose one person to guide the discussion and another to take notes. Read the scenario aloud, use a timer, and ask everyone for ideas. A critical system means a tool your organization needs for important work. Technology support means the people who help with computers and accounts. Record unknown information instead of guessing, and follow the four steps below."));
-    const parts = [
-        { title: "Step 1 — Understand the Problem (3 minutes)", questions: ["What happened?", "Which important system is affected?", "Who noticed the problem in this practice scenario?"] },
-        { title: "Step 2 — Who Do We Contact? (5 minutes)", questions: ["Who should employees notify, using the contact details recorded above?", "How should the problem be reported?", a.itSupport === "No IT Support" ? "With no dedicated technology support, who could arrange qualified help and when should they do so?" : "When should the technology-support provider or designated technical responder be contacted?"] },
-        { title: "Step 3 — What Happens Next? (7 minutes)", complication: buildExerciseComplication(a), questions: ["What if the system stays unavailable?", "How can essential operations continue using approved alternatives?", "Who should communicate updates, and what facts can they confirm?"] },
-        { title: "Step 4 — What Did We Learn? (5 minutes)", questions: ["What went well?", "What was confusing?", "What needs improvement?", "Who will be responsible for each improvement?"] }
-    ];
-    parts.forEach(part => {
-        const article = element("article", undefined, "exercise-part");
-        article.append(element("h3", part.title));
-        if (part.complication) article.append(element("p", "New development: " + part.complication, "exercise-complication"));
-        const list = element("ul");
-        part.questions.forEach(question => list.append(element("li", question)));
-        article.append(list);
-        facilitator.append(article);
+    select.value = recommended.id;
+    const help = el("p", "Recommended practice scenario based on your assessment. This is a training choice, not a prediction of an attack.");
+    help.id = "tabletopScenarioHelp";
+    controls.append(label, select, help);
+    const content = el("div", undefined, "tabletop-content"); content.id = "tabletopContent";
+    select.setAttribute("aria-controls", content.id);
+    const status = el("p", "", "tabletop-screen"); status.setAttribute("role", "status");
+    report.append(controls, status, content);
+
+    const paragraph = (parent, text, className) => { const p = el("p", text, className); parent.append(p); return p; };
+    const bullets = (parent, points, className) => { const list = el("ul", undefined, className); points.forEach(point => list.append(el("li", point))); parent.append(list); return list; };
+    function decisionKey(parent, decision) {
+        const key = el("div", undefined, "tabletop-decision-key"); parent.append(key);
+        paragraph(key, "✓ Recommended answer: " + String.fromCharCode(65 + decision.recommended), "tabletop-recommended");
+        bullets(key, decision.options.map((option, i) => String.fromCharCode(65 + i) + ": " + option.consequence));
+        paragraph(key, "Lesson: " + decision.lesson);
+    }
+    function decisionPoint(parent, scenario) {
+        const decision = scenario.decision;
+        const fieldset = el("fieldset", undefined, "tabletop-decision");
+        fieldset.dataset.decision = scenario.id;
+        fieldset.append(el("legend", "Practice decision — " + decision.situation));
+        paragraph(fieldset, "Choose an answer for discussion. You can change it; no answer blocks the exercise.", "tabletop-screen");
+        const choices = el("div", undefined, "tabletop-screen tabletop-choices");
+        choices.setAttribute("role", "group"); choices.setAttribute("aria-label", "Practice choices");
+        const feedback = el("div", undefined, "tabletop-screen tabletop-feedback");
+        feedback.id = "decision-" + scenario.id + "-feedback"; feedback.hidden = true;
+        feedback.setAttribute("aria-live", "polite"); feedback.setAttribute("aria-atomic", "true");
+        const buttons = decision.options.map((option, i) => {
+            const button = el("button", String.fromCharCode(65 + i) + ". " + option.text);
+            button.type = "button"; button.setAttribute("aria-pressed", "false"); button.setAttribute("aria-controls", feedback.id);
+            button.addEventListener("click", () => {
+                buttons.forEach((other, j) => other.setAttribute("aria-pressed", String(i === j)));
+                feedback.replaceChildren(); paragraph(feedback, "You chose " + String.fromCharCode(65 + i) + ". Discuss all three outcomes below.");
+                decisionKey(feedback, decision); feedback.hidden = false;
+            });
+            choices.append(button); return button;
+        });
+        const paperChoices = bullets(fieldset, decision.options.map((option, i) => String.fromCharCode(65 + i) + ". " + option.text), "tabletop-print tabletop-paper-choices");
+        paperChoices.setAttribute("aria-label", "Practice choices for printing");
+        fieldset.append(choices, feedback); parent.append(fieldset);
+    }
+    function draw(scenario) {
+        const steps = buildTabletopSteps(a, scenario);
+        content.replaceChildren(); content.dataset.scenario = scenario.id;
+        const opening = el("section", undefined, "tabletop-scenario");
+        opening.append(el("h2", "Your practice scenario — " + scenario.title));
+        paragraph(opening, "A fictional discussion for your team. No real incident is being reported here.");
+        paragraph(opening, buildTabletopScenario(a, scenario.id), "tabletop-opening");
+        paragraph(opening, "This is only a practice discussion. Do not disconnect real computers, change passwords, open suspicious links, send messages, or change any real systems.", "exercise-safety");
+        paragraph(opening, "Do not make payments, send test phishing emails or change network settings. Talk about what your team would do in a real incident; do not carry out the actions.", "exercise-privacy");
+        const details = el("dl", undefined, "exercise-context");
+        const summary = [
+            ["Critical system", c.system || "Not named — identify the tool your team needs most."],
+            ["IT support", a.itSupport === "Internal IT Team" ? "An internal IT team is reported; confirm a name and phone number." : a.itSupport === "External IT Provider" ? "An external IT provider is reported; confirm a company and phone number." : a.itSupport === "Office Manager" ? "Your Office Manager handles IT matters; discuss when outside help is needed." : a.itSupport === "No IT Support" ? "No IT support is listed. Identify who could arrange trusted help." : "IT support is not confirmed. Identify who could arrange trusted help."],
+            ["Emergency contact", c.contact || "Not named — choose who employees would contact."],
+            ["Reporting method", a.reportingMethod === "Email" ? "Email is usual. Discuss a trusted phone number if email is unsafe or down." : a.reportingMethod === "Phone" ? "Phone is usual. Identify a trusted number." : a.reportingMethod === "In Person" ? "In person is usual. Discuss a backup if the contact is away." : "Method not confirmed or not described — identify it together."],
+            ["Alternate contact", a.alternateContact === "Yes" ? "Available according to the assessment; name and phone still need confirmation." : a.alternateContact === "No" ? "None reported — identify a backup person." : "Unknown — check whether a backup person exists."],
+            ["Backups and testing", a.backups === "No" ? "Your organization does not currently report having backups." : a.backups !== "Yes" ? "Backup availability is unknown — identify who would check." : a.backupTesting === "Yes" ? "Backups have been tested according to the assessment; current copies still need checking." : a.backupTesting === "No" ? "Backups are reported, but have not been tested." : "Backups are reported; testing is unknown."],
+            ["Written response plan", a.existingPlan === "Yes" ? "A written response plan is reported; identify where it is kept." : a.existingPlan === "No" ? "No written response plan is reported; record decisions during practice." : a.existingPlan === "Partially" ? "Partly complete — identify the missing instructions." : "Written response instructions are not confirmed — identify who would check."],
+            ["Sensitive information", a.sensitiveData === "Yes" ? "Reported. Use made-up records only in this exercise." : a.sensitiveData === "No" ? "None reported. Use fictional details in the selected story." : "Unknown — identify who would check; do not share real records."]
+        ];
+        summary.forEach(([term, value]) => { const row = el("div"); row.append(el("dt", term), el("dd", value)); details.append(row); });
+        opening.append(details);
+        const words = el("aside", undefined, "tabletop-words"); words.append(el("h3", "Words to Know"));
+        bullets(words, ["Incident: a security problem that may harm your accounts, information or work.", "Phishing: a fake message that tries to trick you into sharing information or doing something unsafe.", "Ransomware: harmful software that locks files and asks for money to unlock them.", "Backup: a separate copy of information that may help you get it back.", "Critical system: a tool your organization needs for its most important work."]);
+        opening.append(words); content.append(opening);
+
+        const discussion = el("section", undefined, "facilitator-guide tabletop-discussion");
+        discussion.append(el("h2", "Simple facilitator guide — 20 minutes"));
+        paragraph(discussion, "Choose one person to lead and another to take notes. Read the story aloud, use a timer and invite everyone's ideas. Record unknown details instead of guessing. A missing contact or procedure is a useful finding, not a failure.");
+        steps.forEach((step, i) => {
+            const article = el("article", undefined, "exercise-part"); article.dataset.step = i + 1; article.dataset.minutes = step.minutes;
+            article.append(el("h3", "Step " + (i + 1) + " — " + step.title + " (" + step.minutes + " minutes)"));
+            if (i === 2) paragraph(article, "New development: " + buildExerciseComplication(a, scenario.id), "exercise-complication");
+            bullets(article, step.questions, "tabletop-questions");
+            if (scenario.decision.step === i + 1) decisionPoint(article, scenario);
+            const inline = el("div", undefined, "tabletop-screen tabletop-suggestions");
+            const button = el("button", "Show Suggested Answers"); button.type = "button";
+            const hints = el("div", undefined, "tabletop-hints"); hints.id = "strong-" + scenario.id + "-" + i; hints.hidden = true;
+            hints.append(el("h4", "What a Strong Answer Includes")); bullets(hints, step.guidance);
+            button.setAttribute("aria-expanded", "false"); button.setAttribute("aria-controls", hints.id);
+            button.addEventListener("click", () => {
+                hints.hidden = !hints.hidden; button.setAttribute("aria-expanded", String(!hints.hidden));
+                button.textContent = hints.hidden ? "Show Suggested Answers" : "Hide Suggested Answers";
+            });
+            inline.append(button, hints); article.append(inline);
+            discussion.append(article);
+        });
+        const worksheet = el("section", undefined, "lessons-worksheet");
+        worksheet.append(el("h2", "What We Learned"));
+        paragraph(worksheet, "Organization: " + snapshot.organizationName + " · Practice scenario: " + scenario.title);
+        paragraph(worksheet, "Record your discussion and agree on follow-up work. Finding a gap is progress.");
+        paragraph(worksheet, c.recovery, "exercise-privacy");
+        ["What went well?", "What was confusing?", "What needs improvement?", "What action will we take next?", "Who will be responsible?", "Target completion date"].forEach(label => {
+            const block = el("div", undefined, "worksheet-answer");
+            block.append(el("h3", label), el("div", undefined, "writing-lines")); worksheet.append(block);
+        });
+        const guide = el("section", undefined, "tabletop-print tabletop-answer-guide");
+        guide.append(el("h2", "Facilitator Answer Guide"));
+        paragraph(guide, snapshot.organizationName + " · " + scenario.title + ". Keep these pages separate from the participant discussion pages.");
+        steps.forEach((step, i) => {
+            const block = el("article", undefined, "tabletop-answer-block");
+            block.append(el("h3", "Step " + (i + 1) + " — " + step.title), el("h4", "What a Strong Answer Includes"));
+            bullets(block, step.guidance);
+            if (scenario.decision.step === i + 1) {
+                const answer = el("div", undefined, "tabletop-answer-decision");
+                paragraph(answer, "Practice decision: " + scenario.decision.situation); decisionKey(answer, scenario.decision); block.append(answer);
+            }
+            guide.append(block);
+        });
+        guide.append(el("h3", "Optional second development — within Step 3's 7 minutes"));
+        paragraph(guide, buildExerciseComplication(a, scenario.id, true));
+        paragraph(guide, "Use this only if there is time. Skip another Step 3 question if needed; do not add time or perform real actions.");
+        paragraph(guide, "Lesson learned: " + scenario.lesson);
+        // Screen facilitators can reveal this extra story without exposing the print answer key.
+        const optional = el("details", undefined, "tabletop-screen tabletop-optional");
+        optional.append(el("summary", "Facilitator: optional second development (within Step 3's 7 minutes)"));
+        paragraph(optional, buildExerciseComplication(a, scenario.id, true));
+        paragraph(optional, "Use only if time permits; replace another Step 3 question rather than extending the exercise.");
+        discussion.querySelector('[data-step="3"]').append(optional);
+        content.append(discussion, worksheet, guide);
+    }
+    draw(recommended);
+    select.addEventListener("change", () => {
+        const scenario = tabletopScenarios.find(s => s.id === select.value);
+        if (!scenario) return;
+        draw(scenario); status.textContent = scenario.title + " practice loaded. Your organization's assessment answers are unchanged.";
     });
-    const worksheet = element("section", undefined, "lessons-worksheet");
-    worksheet.append(element("h2", "What We Learned"), element("p", "Organization: " + snapshot.organizationName), element("p", "Use the space below to record your discussion and agree on follow-up work."));
-    ["What went well?", "What was confusing?", "What needs improvement?", "What action will we take next?", "Who will be responsible?", "Target completion date"].forEach(label => {
-        const block = element("div", undefined, "worksheet-answer");
-        block.append(element("h3", label), element("div", undefined, "writing-lines"));
-        worksheet.append(block);
-    });
-    report.append(scenario, facilitator, worksheet);
 }
 
 // Central rule evaluator: no DOM dependencies, so findings can be exercised independently.
