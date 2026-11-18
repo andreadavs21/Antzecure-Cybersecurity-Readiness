@@ -121,3 +121,19 @@ All activities are discussion-only: no network calls, payments, account changes 
 security actions are attached to exercise controls. Choices and scenario selections stay
 in the resource tab and are not saved. The worksheet remains a printable writing sheet.
 Optional mock props were left out to keep the focus on stories, decisions and guidance.
+
+Tabletop usability regression checks
+-----------------------------------
+
+The tabletop suite also verifies one safety banner with the exact discussion-only text;
+no confusing capability wording such as “is reported”; action guidance using the real
+emergency contact, critical system, IT arrangement and sensitive-information answer;
+and scenario-specific facts to collect. The scenario announcement is screen-reader-only.
+
+Decision cards now use a normal heading inside a labelled group instead of a fieldset
+legend across the border. Automated desktop/mobile geometry checks keep the heading and
+all three buttons inside the card. During manual Chrome/Safari review, also check the
+card before and after choosing an answer at narrow widths, and check its border, wrapped
+text, selected state, keyboard focus, consequences and printable choices. Screen-reader
+users should hear a short “practice scenario selected” message after a scenario change;
+there should be no visible status message or toast.

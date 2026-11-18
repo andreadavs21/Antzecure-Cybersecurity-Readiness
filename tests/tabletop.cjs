@@ -21,6 +21,17 @@ console.log('PDF artifacts: ' + output);
   ];
   return checks.map(([a,expected]) => [recommendTabletopScenario({...base,...a}).id,expected]);
  }); rules.forEach(([actual,expected]) => assert.equal(actual,expected));
+ await page.evaluate(()=>{
+  for(const scenario of tabletopScenarios){
+   const answers={emergencyContact:'IT Manager',criticalSystems:'Financial Systems',sensitiveData:'Yes',itSupport:'External IT Provider',backups:'Yes',backupTesting:'No'};
+   const steps=buildTabletopSteps(answers,scenario);
+   const first=steps[0].guidance.join(' ');
+   if(!first.includes('Call IT Manager using a trusted phone number') || !first.includes('Financial Systems') || !first.includes('sensitive customer, employee or financial records'))throw Error('action personalization');
+   if(!steps[1].guidance.join(' ').includes('Call your external IT provider'))throw Error('IT personalization');
+   if(!first.includes(scenario.collect))throw Error('scenario-specific facts to collect');
+  }
+ });
+
  const profiles = [
   {name:'Small nonprofit',itSupport:'No IT Support',backups:'No',reportingMethod:'Phone',expected:'ransomware',emergencyContact:'Not Assigned'},
   {name:'Small business',itSupport:'External IT Provider',backups:'Yes',backupTesting:'No',reportingMethod:'Email',expected:'email-takeover',emergencyContact:'Office Manager'},
@@ -58,6 +69,28 @@ console.log('PDF artifacts: ' + output);
    assert((await popup.locator('.exercise-complication').textContent()).includes(model.development));
    assert((await popup.locator('.tabletop-optional').textContent()).includes(model.optional));
    assert.equal(await popup.locator('.tabletop-decision').getAttribute('data-decision'),id);
+   assert.equal(await popup.locator('.exercise-safety').count(),1);
+   assert.equal(await popup.locator('.exercise-safety strong').textContent(),'PRACTICE ONLY — DO NOT CHANGE REAL SYSTEMS');
+   assert.equal(await popup.locator('.exercise-safety p').textContent(),'This is a discussion exercise. Talk through what your team would do during a real cybersecurity problem. Do not disconnect computers, change passwords, open suspicious links, send messages, or modify real systems during this practice.');
+   const allText=await popup.locator('.tabletop-content').textContent();
+   assert(!/\b(?:is|are|was|were) reported\b|reports no earlier|Treat this as a practice story|Do not assume it is affected|Use made-up records|do not perform real actions/i.test(allText));
+   assert(!allText.includes('{it}'));
+   assert.equal(await popup.locator('.tabletop-decision fieldset, .tabletop-decision legend').count(),0);
+   assert.equal(await popup.locator('.tabletop-decision').getAttribute('role'),'group');
+   assert.equal(await popup.locator('.tabletop-decision h4').textContent(),'Practice decision');
+   assert.equal(await popup.locator('.tabletop-decision').getAttribute('aria-labelledby'),await popup.locator('.tabletop-decision h4').getAttribute('id'));
+   const announcement=popup.locator('.tabletop-announcement');
+   assert.equal(await announcement.textContent(),model.title+' practice scenario selected.');
+   assert.equal(await announcement.getAttribute('aria-live'),'polite');
+   assert.equal(await announcement.evaluate(e=>getComputedStyle(e).clipPath),'inset(50%)');
+   assert(!(await popup.locator('main').textContent()).includes('practice loaded'));
+   const geometry=()=>popup.locator('.tabletop-decision').evaluate(card=>{
+    const rect=card.getBoundingClientRect(), title=card.querySelector('h4').getBoundingClientRect();
+    return title.top>=rect.top+7 && title.left>=rect.left+7 && title.right<=rect.right &&
+     [...card.querySelectorAll('.tabletop-choices button')].every(b=>{const r=b.getBoundingClientRect();return r.left>=rect.left && r.right<=rect.right && r.bottom<=rect.bottom;});
+   });
+   assert(await geometry(),'desktop heading/options remain inside the card border');
+
    assert.equal(await popup.locator('.exercise-part').count(),4);
    const minutes = await popup.locator('.exercise-part').evaluateAll(els=>els.map(el=>Number(el.dataset.minutes)));
    assert.deepEqual(minutes,[3,5,7,5]); assert.equal(minutes.reduce((a,b)=>a+b),20);
@@ -104,13 +137,14 @@ console.log('PDF artifacts: ' + output);
    }
    await popup.emulateMedia({media:'screen'});
    await popup.setViewportSize({width:390,height:844}); assert(await popup.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+   assert(await geometry(),'mobile heading/options remain inside the card border');
    await popup.setViewportSize({width:1280,height:900});
    const summary=await popup.locator('.exercise-context').innerText();
    assert(summary.includes('Shared Files'));
    assert(summary.includes(profile.itSupport==='No IT Support'?'No IT support is listed':profile.itSupport==='External IT Provider'?'external IT provider':'internal IT team'));
-   if(p===0) assert(summary.includes('does not currently report having backups') && summary.includes('Not named'));
+   if(p===0) assert(summary.includes('assessment says your organization has no backups') && summary.includes('Not named'));
    if(p===1) assert(summary.includes('not been tested') && summary.includes('trusted phone number'));
-   if(p===2) assert(summary.includes('Backups have been tested') && summary.includes('written response plan'));
+   if(p===2) assert(summary.includes('your backups have been tested') && summary.includes('written response plan'));
   }
   // The toolbar still calls the resource window's native print entry point.
   await popup.evaluate(()=>{window.print=()=>{window.printWasRequested=true;};});
