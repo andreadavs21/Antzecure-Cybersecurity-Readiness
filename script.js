@@ -1774,7 +1774,7 @@ function renderIncidentPlan(context) {
     const { element: el, report, snapshot } = context;
     const a = snapshot.answers;
     const missing = new Set();
-    const contact = isKnownContact(a.emergencyContact) ? knownResourceValue(a.emergencyContact) : "";
+    const contact = knownResourceValue((a.emergencyContact || "").trim());
     const itPhrases = {
         "Internal IT Team": "your internal IT team",
         "External IT Provider": "your external IT provider",
@@ -1812,25 +1812,17 @@ function renderIncidentPlan(context) {
     paragraph(header, "Keep a printed copy. If your computers stop working, you will still have this plan.", "draft-note");
     report.append(header);
 
-    const stop = section(1, "Stop the Spread", "If you think your computer has been attacked, take these steps to help stop the problem from spreading.");
-    // Scope the physical disconnect advice to an employee's own device, never shared equipment.
-    paragraph(stop, "These steps are for your own computer or device. Do not touch servers, routers, or other shared equipment; ask " + it + " first.", "draft-device-note");
+    const stop = section(1, "Stop the Spread", "Take these steps first. Leave technical fixes to the people who help with your computers.");
     const stopList = checks(stop);
-    item(stopList, "Stop using the affected computer or device.");
-    item(stopList, "Disconnect it from the internet: unplug its network cable or turn off Wi-Fi.");
-    item(stopList, "Keep it turned on. If you can't disconnect it, call " + it + " right away and ask whether to turn it off.");
-    item(stopList, "Do not delete suspicious emails, messages, or files.");
-    item(stopList, "Write down what you saw and when. If a warning message is on the screen, take a photo of it with your phone. Do not reopen suspicious emails, links, or files.");
-    item(stopList, "Do not reply to or pay anyone who demands money. Your leadership will decide what to do next.");
-    if (a.deviceIsolation === "Yes") {
-        const note = paragraph(stop, "Your organization has approved steps for disconnecting a device. Follow them.");
-        blank(note, "Where to find them");
-    } else if (a.deviceIsolation === "No") {
-        paragraph(stop, "Disconnecting your own computer from the internet is generally safe if it doesn't affect anyone else's work. For shared equipment, such as servers or network equipment, wait for instructions from " + it + ".");
-    } else {
-        paragraph(stop, "To disconnect your own computer, unplug the network cable from the computer or turn off its Wi-Fi. Do not touch servers, routers, or other shared equipment. Call " + it + " first.");
-        if (a.deviceIsolation === "Partially") paragraph(stop, "Your approved disconnect steps are not finished.");
-        else { blank(stop, "Approved disconnect steps — confirm where to find them"); missing.add("Confirm approved disconnect steps."); }
+    item(stopList, "Stop using the affected computer.");
+    item(stopList, "If it is your own computer, turn off Wi-Fi or unplug its network cable. Leave it powered on when possible.");
+    item(stopList, "Do not delete files, click suspicious messages, or pay anyone demanding money.");
+    item(stopList, "Write down what happened and when you noticed it.");
+    paragraph(stop, "For shared systems, servers, or equipment that affects other employees, contact " + it + " before disconnecting or shutting down anything.", "draft-device-note");
+    if (a.deviceIsolation === "Yes") paragraph(stop, "Follow your organization's approved disconnect steps for your own computer.");
+    else {
+        paragraph(stop, "If you are unsure how to disconnect your own computer safely, stop and ask " + it + " for help.");
+        if (a.deviceIsolation !== "No") missing.add("Confirm safe steps for disconnecting an affected computer.");
     }
     paragraph(stop, "If there is an immediate danger to people, follow emergency safety procedures first.", "draft-safety");
 
@@ -1846,72 +1838,74 @@ function renderIncidentPlan(context) {
     } else if (a.reportingMethod !== "Phone") {
         blank(reportStep, "Usual reporting method — confirm"); missing.add("Confirm the usual reporting method.");
     }
-    reportStep.append(el("h3", "A. Call right away"));
-    const calls = checks(reportStep);
-    if (contact) item(calls, "Call " + contact + ".", [["Phone"]]);
-    else { item(calls, "No main contact is assigned yet.", [["Main contact name"], ["Phone"]]); missing.add("Assign a main contact."); }
-    if (a.alternateContact === "Yes") item(calls, "If your main contact doesn't answer, call your backup contact.", [["Backup contact name"], ["Phone"]]);
-    else if (a.alternateContact === "No") {
-        item(calls, "No backup contact is assigned. Choose one before an emergency.", [["Backup contact name"], ["Phone"]]); missing.add("Choose a backup contact.");
-    } else { item(calls, "Check whether your organization has a backup contact.", [["Backup contact name"], ["Phone"]]); missing.add("Confirm a backup contact."); }
-    if (a.itSupport === "Internal IT Team") item(calls, "Call " + it + ".", [["Phone"]]);
-    else if (a.itSupport === "External IT Provider") item(calls, "Call " + it + ".", [["Company"], ["Phone"]]);
-    else if (a.itSupport === "Office Manager") item(calls, "Call " + it + ". Your Office Manager should arrange help from a trusted IT professional if needed.", [["Phone"]]);
-    else {
-        item(calls, (a.itSupport === "No IT Support" ? "No IT support is listed. " : "IT support is not confirmed. ") + "Call " + it + ". Your manager should arrange help from a trusted IT professional.", [["IT professional"], ["Phone"]]);
+    reportStep.append(el("h3", "A. Who to Call"));
+    const calls = el("ol", undefined, "draft-call-order"); reportStep.append(calls);
+    function contactRow(type, title, note, fields) {
+        const row = el("li"); row.dataset.contact = type;
+        row.append(el("strong", title));
+        if (note) paragraph(row, note);
+        const group = el("div", undefined, "draft-field-row");
+        fields.forEach(([label, value]) => blank(group, label, value));
+        row.append(group); calls.append(row);
+    }
+    contactRow("main", "Call your main contact", contact ? "" : "No main contact is assigned yet. Complete these details before use.", [["Name or role", contact], ["Phone"]]);
+    if (!contact) missing.add("Assign a main contact.");
+    const alternateNote = a.alternateContact === "Yes" ? "Use this number if your main contact does not answer."
+        : a.alternateContact === "No" ? "No backup contact has been assigned. Choose one before an emergency."
+        : "Confirm who will take calls when the main contact is unavailable.";
+    contactRow("backup", "If unavailable, call your backup contact", alternateNote, [["Name or role"], ["Phone"]]);
+    if (a.alternateContact !== "Yes") missing.add(a.alternateContact === "No" ? "Choose a backup contact." : "Confirm a backup contact.");
+    // Reuse the first number only when the assessment explicitly names the same role.
+    // An IT Manager is not assumed to be an entire internal team or an outside provider.
+    const sameItContact = ["Internal IT Team", "External IT Provider", "Office Manager"].includes(a.itSupport)
+        && contact.toLowerCase() === a.itSupport.toLowerCase();
+    if (sameItContact) {
+        contactRow("it", "Contact IT support", "Your main contact also handles IT. Use the main contact's number above." + (a.itSupport === "Office Manager" ? " They should arrange a trusted technology professional when needed." : ""), []);
+    } else if (a.itSupport === "Internal IT Team") {
+        contactRow("it", "Contact your internal IT team", "", [["Name or team", "Internal IT Team"], ["Phone"]]);
+    } else if (a.itSupport === "External IT Provider") {
+        contactRow("it", "Contact your external IT provider", "", [["Provider or company"], ["Phone"]]);
+    } else if (a.itSupport === "Office Manager") {
+        contactRow("it", "Contact your Office Manager", "Ask them to arrange a trusted technology professional if needed.", [["Name or role", "Office Manager"], ["Phone"]]);
+    } else {
+        contactRow("it", "Ask management to arrange IT help", (a.itSupport === "No IT Support" ? "Your organization has no dedicated IT support. " : "Your IT support is not confirmed. ") + "Management should arrange a trusted technology professional.", [["IT professional"], ["Phone"]]);
         missing.add(a.itSupport === "No IT Support" ? "Arrange trusted IT help." : "Confirm IT support.");
     }
-    item(calls, "Call your incident coordinator or manager. This may be a different person from your main contact.", [["Coordinator or manager name"], ["Phone"]]);
-    reportStep.append(el("h3", "B. What to tell them"));
+    paragraph(reportStep, "If a different person coordinates the incident, notify them as well. Confirm this with your main contact before use.");
+    paragraph(reportStep, "Complete and verify missing contact details before using this plan in a real incident.", "draft-contact-note");
+    paragraph(reportStep, "Management may need advice from its insurer (if applicable), a legal advisor, or relevant authorities." + (a.sensitiveData === "Yes" ? " Tell management if customer, employee, or financial information may be involved." : a.sensitiveData !== "No" ? " Ask management to check whether personal or financial information may be involved." : ""), "draft-management-note");
+    reportStep.append(el("h3", "B. What to Tell Them"));
     const tell = el("ul", undefined, "draft-tell");
-    ["What happened?", "When did you notice it?", "Which computer, account, or system is affected?", "Are you seeing any warning messages?"].forEach(text => tell.append(el("li", text))); reportStep.append(tell);
-    paragraph(reportStep, "Your incident coordinator or " + it + " will check how serious the problem is.");
+    ["What happened?", "When did you notice it?", "Which computer, account, or system is affected?", "Are there any warning messages?"].forEach(text => tell.append(el("li", text))); reportStep.append(tell);
+    paragraph(reportStep, "The person handling the incident and your IT support will help decide what to do next.");
 
-    const leadership = el("div", undefined, "draft-leadership"); reportStep.append(leadership);
-    leadership.append(el("h3", "C. Leadership decides"));
-    paragraph(leadership, "Not every problem needs every report below. Your leadership decides which ones apply.");
-    const leadershipList = checks(leadership);
-    item(leadershipList, "Cyber insurance provider, if you have one.", [["Company"], ["Policy number"], ["Phone"]]);
-    const cisa = item(leadershipList, "Report to CISA (U.S. Cybersecurity and Infrastructure Security Agency): ");
-    const cisaLink = el("a", "cisa.gov/report"); cisaLink.href = "https://www.cisa.gov/report";
-    cisa.append(cisaLink, report.ownerDocument.createTextNode(" or (888) 282-0870"));
-    const fbi = item(leadershipList, "Report internet crime to the FBI: ");
-    const fbiLink = el("a", "ic3.gov"); fbiLink.href = "https://www.ic3.gov/"; fbi.append(fbiLink);
-    if (a.sensitiveData === "Yes") paragraph(leadership, "Personal or financial information may be involved. Leadership should get legal advice about who must be told.");
-    else if (a.sensitiveData !== "No") {
-        paragraph(leadership, "Find out whether personal or financial information may be involved.");
-        blank(leadership, "Personal or financial information — confirm"); missing.add("Confirm whether personal or financial information is involved.");
-    }
-
-    const recover = section(3, "Recover and Follow Up", "Work with the people responsible for your systems to restore normal operations safely.");
+    const recover = section(3, "Recover and Follow Up", "Let IT support do the technical work. Follow their instructions before using affected systems again.");
     const recoveryList = checks(recover);
-    if (["Email", "Financial Systems", "Customer Records", "Shared Files", "Website"].includes(a.criticalSystems)) item(recoveryList, "Check whether your " + a.criticalSystems + " is affected.");
-    else if (a.criticalSystems === "Other") item(recoveryList, "Check whether your most important system is affected.", [["System"]]);
-    else { item(recoveryList, "Check which important systems are affected.", [["List important systems"]]); missing.add("Identify important systems."); }
-    item(recoveryList, "Work with " + it + " to make sure the problem has stopped before restoring anything.");
-    if (a.backups === "No") item(recoveryList, "Your organization has no backups. Ask " + it + " about other ways to recover.");
+    const technicalHelp = ["Internal IT Team", "External IT Provider"].includes(a.itSupport) ? it : "a trusted technology professional";
+    if (a.itSupport === "No IT Support" || !itPhrases[a.itSupport]) item(recoveryList, "Ask management to arrange a trusted technology professional to check that the problem has stopped before any systems are restored.");
+    else if (a.itSupport === "Office Manager") item(recoveryList, "Ask your Office Manager to arrange a trusted technology professional to check that the problem has stopped.");
+    else item(recoveryList, "Ask " + it + " to check that the problem has stopped.");
+    if (["Email", "Financial Systems", "Customer Records", "Shared Files", "Website"].includes(a.criticalSystems)) item(recoveryList, "Confirm which important systems need to be restored, starting with " + a.criticalSystems + ".");
+    else {
+        item(recoveryList, "Confirm which important systems need to be restored.", [["Important system"]]);
+        if (a.criticalSystems !== "Other") missing.add("Identify important systems.");
+    }
+    if (a.backups === "No") item(recoveryList, "Your answers say there are no backups. Let " + technicalHelp + " find other ways to get important systems working again.");
     else if (a.backups !== "Yes") {
-        item(recoveryList, "Find out whether your organization has backups before planning recovery.", [["Backups available — confirm"]]); missing.add("Confirm whether backups exist.");
-    } else if (a.backupTesting === "Yes") item(recoveryList, "Check that your backups are safe before using them. They have been tested before.");
-    else if (a.backupTesting === "No") {
-        const warning = item(recoveryList, ""); warning.append(el("strong", "Your backups have never been tested. They may not work. "), report.ownerDocument.createTextNode("Do not count on them until " + it + " checks them."));
-    } else {
-        item(recoveryList, "It is not known whether your backups have been tested. Ask " + it + " to check them before using them.", [["Backup testing — confirm"]]); missing.add("Confirm whether backups have been tested.");
-    }
-    item(recoveryList, "Restore important systems only after " + it + " says it is safe.");
-    if (a.itSupport === "No IT Support" || !itPhrases[a.itSupport]) paragraph(recover, "Your manager should arrange help from a trusted IT professional before restoring anything.");
-    if (a.recoveryCommunication === "Yes") item(recoveryList, "Tell employees what is working and what they should do next. Use your usual process to update employees.");
+        item(recoveryList, "Let " + technicalHelp + " confirm whether backups exist before planning how to get systems working again.");
+        missing.add("Confirm whether backups exist.");
+    } else if (a.backupTesting === "Yes") item(recoveryList, "Backups have been tested before. Let " + technicalHelp + " check current copies and restore systems only when it is safe.");
+    else if (a.backupTesting === "No") item(recoveryList, "Your backups have not been tested. Let " + technicalHelp + " check them before using them or restoring affected systems.");
     else {
-        item(recoveryList, "Tell employees what is working and what they should do next. Choose who will update employees and how. If email is down, use phone or text.", [["Person"], ["Method"]]);
-        if (!["No", "Partially"].includes(a.recoveryCommunication)) missing.add("Confirm how employees will receive updates.");
+        item(recoveryList, "Backup testing is unknown. Let " + technicalHelp + " check the copies before planning how to get systems working again.");
+        missing.add("Confirm whether backups have been tested.");
     }
-    item(recoveryList, "Write down what happened and what your organization can do better next time.");
-    if (a.recoveryProcedures === "Yes") {
-        const line = paragraph(recover, "Follow your written recovery steps."); blank(line, "Where to find them");
-    } else if (a.recoveryProcedures === "Partially") paragraph(recover, "Your written recovery steps are not finished. Ask " + it + " to help with the missing parts.");
+    item(recoveryList, "Tell employees what is working again and what they should do next." + (a.recoveryCommunication === "Yes" ? " Use your usual update process." : " Agree who gives updates. Use phone or text if email is down."));
+    if (a.recoveryProcedures === "Yes") paragraph(recover, "IT support should follow your written recovery steps and check systems before staff use them again.");
+    else if (a.recoveryProcedures === "Partially") paragraph(recover, "Your written recovery steps are not finished. Management and " + technicalHelp + " should agree the missing steps.");
     else {
-        paragraph(recover, "There are no known written recovery steps. " + it[0].toUpperCase() + it.slice(1) + " should guide the recovery.");
-        if (a.recoveryProcedures !== "No") { blank(recover, "Written recovery steps — confirm"); missing.add("Confirm written recovery steps."); }
+        paragraph(recover, "Management and " + technicalHelp + " should agree safe recovery steps before affected systems are used again.");
+        if (a.recoveryProcedures !== "No") missing.add("Confirm written recovery steps.");
     }
     const complete = el("aside", undefined, "draft-complete"); complete.append(el("h3", "Still to Complete"));
     if (missing.size) {
