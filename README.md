@@ -113,5 +113,19 @@ CISA — StopRansomware Guide
 https://www.cisa.gov/stopransomware
 These resources help guide the project's assessment structure, recommendations, and incident response content.
 
+## Project Screenshots
 
+### Homepage
+![Antzecure Homepage](screenshots/homepage.png)
+
+### Emergency Contact Cards
+![Emergency Contact Cards](screenshots/ContactCards.png)
+
+### Incident Response Plan
+![Incident Response Plan](screenshots/incident-response-plan.png)
+![Incident Response Plan - Additional View](screenshots/incident-response-plan2.png)
+
+### 20-Minute Tabletop Exercise
+![Tabletop Exercise](screenshots/tabletopExcercise.png)
+![Tabletop Exercise - Additional View](screenshots/tabletopExcercise_2.png)
 
