@@ -427,7 +427,6 @@ footer p { margin: 0; }
 .resource-incidentPlan .draft-urgent { border-left: 3px solid var(--red); padding: 7px 10px; background: #fff4f5; }
 .resource-incidentPlan .draft-tell { padding-left: 18px; margin: 5px 0; }
 .resource-incidentPlan .draft-tell li { margin: 1px 0; }
-.resource-incidentPlan .draft-leadership { border-top: 1px solid var(--border); padding-top: 6px; margin-top: 12px; }
 .resource-incidentPlan .draft-complete { border-top: 1px solid var(--border); margin-top: 14px; padding-top: 6px; font-size: 12px; }
 .resource-incidentPlan .draft-complete p { margin: 5px 0; }
 .resource-incidentPlan .draft-field-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
@@ -454,7 +453,6 @@ footer p { margin: 0; }
     .resource-incidentPlan .draft-field { font-size: 9pt; margin: 0 8px 0 0; }
     .resource-incidentPlan .draft-field input { display: none; }
     .resource-incidentPlan .draft-field .print-field-value { min-width: 80px; min-height: 0; padding: 0 2px 1px; font-size: 9pt; }
-    .resource-incidentPlan .draft-leadership { break-before: page; page-break-before: always; border-top: 0; margin-top: 0; padding-top: 0; }
     .resource-incidentPlan .draft-complete { font-size: 9pt; break-inside: avoid; }
 }
 .resource-incidentPlan .draft-complete ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 20px; padding-left: 16px; margin: 5px 0; }
@@ -539,3 +537,19 @@ footer p { margin: 0; }
 .resource-tabletop .tabletop-decision-situation { margin: 0 0 12px; line-height: 1.5; }
 .resource-tabletop .exercise-safety > strong { display: block; }
 .resource-tabletop .exercise-safety > p { margin: 7px 0 0; font-weight: 400; }
+
+/* Immediate response contacts: one ordered row per role, with paired fields. */
+.resource-incidentPlan .draft-call-order { padding-left: 24px; margin: 8px 0; }
+.resource-incidentPlan .draft-call-order > li { padding: 8px 0; border-bottom: 1px solid var(--border); }
+.resource-incidentPlan .draft-call-order p { margin: 4px 0; }
+.resource-incidentPlan .draft-call-order .draft-field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
+.resource-incidentPlan .draft-call-order .draft-field { display: flex; margin: 2px 0; align-items: center; }
+.resource-incidentPlan .draft-call-order .draft-field input { flex: 1; min-width: 0; width: 150px; }
+.resource-incidentPlan .draft-contact-note, .resource-incidentPlan .draft-management-note { color: var(--muted); font-size: 12px; }
+@media (max-width: 600px) { .resource-incidentPlan .draft-call-order .draft-field-row { grid-template-columns: 1fr; } }
+@media print {
+    .resource-incidentPlan .draft-call-order > li { break-inside: avoid; padding: 5px 0; }
+    .resource-incidentPlan .draft-call-order .draft-field-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .resource-incidentPlan .draft-call-order .print-field-value { flex: 1; min-width: 0; }
+    .resource-incidentPlan .draft-contact-note, .resource-incidentPlan .draft-management-note { font-size: 9pt; }
+}

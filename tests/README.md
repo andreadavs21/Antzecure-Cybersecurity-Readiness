@@ -16,56 +16,46 @@ These are automated browser/content/PDF-export checks, not manual print-dialog t
 Cases and expected plan content
 -------------------------------
 
-A. External IT, email, no approved disconnect steps, untested backups: phone is urgent;
-   Call your external IT provider; the own-computer/shared-equipment note; bold untested warning.
-B. No IT, no backups or backup contact: manager arranges trusted IT help; no IT team is
-   assumed; other recovery options replace backup use; Still to Complete lists contact/help gaps.
-C. Internal IT, phone, approved disconnect steps, tested backups: Call your internal IT
-   team; editable approved-step location; check safe backups even though previously tested.
-D. Unknown dropdown answers and idk contact: no Call idk or your Not Sure; labeled
-   editable fields and completion reminders for unknown plan details. Q3 and Q14 do not
-   offer Not Sure, so this defensive case supplies those values to the snapshot directly.
-E. Office Manager, Other system/method: Office Manager arranges trusted help as needed;
-   editable system and usual-reporting-method fields.
-F. Not Established reporting: call the main contact until a method is chosen; completion reminder.
-G. Partial recovery procedures/updates and unknown backup testing: finish written steps,
-   verify testing and choose an employee update contact/method.
-H. HTML-looking organization/contact values and in-person reporting: literal text only;
-   no injected elements; nearby contact can also be told in person.
+The plan suite checks external IT, internal IT, no IT support, unknown details, Office
+Manager, absent reporting methods, partial recovery steps, literal HTML-looking text,
+and matching main/IT roles. It covers absent/untested/tested/unknown backups and no
+alternate contact. The matching-role cases verify reuse of the main number without
+another IT phone field; an IT Manager is not assumed to be the same as a whole IT team.
 
-All cases check exactly three steps, consistent everyday wording, typed-field rendering
-and beforeprint synchronization, visible CISA/IC3 addresses, no hard-coded page numbers,
-mobile width, and automated 1–2-page Letter/A4 exports. Existing resources and the
-Contact Card's original field helpers are checked as well.
+Expected layout: four short checkboxes in Stop the Spread; Who to Call with numbered
+main, backup and IT rows; exactly four What to Tell Them questions; four short recovery
+items. The leadership section, insurance fields and CISA/IC3 entries must be absent.
+One short management-advice note remains. All contact inputs are filled in the browser
+checks and verified in Letter/A4 PDF text. User text stays literal, and existing resources
+and the Contact Card's original field helpers remain covered.
 
 Manual Chrome and Safari print checklist
 ----------------------------------------
 
 1. Submit an assessment; open Download Incident Response Plan Draft.
-2. Type the last review date, contact names/phone numbers, company/policy details,
-   procedure locations and other applicable fields. Tab between controls.
-3. Choose Print / Save as PDF. Check both US Letter and A4 at 100% with browser
-   headers/footers disabled. The plan should be 1–2 pages with no cut-off text.
-4. Check all three numbered headings, every checkbox and each filled field. No item
-   should split across pages and no heading should stand alone at a page bottom.
-5. Confirm CISA's address and phone and the FBI address are visible on paper. Leadership
-   reporting must be separate from the employee's immediate calls.
-6. Check the highlighted urgent-phone instruction, the appropriate IT phrase, approved
-   disconnect note and backup warning against your submitted answers.
-7. Save and reopen the PDF. Ensure typed values are present and editable controls are
-   replaced by readable text. Long entries may wrap; review layout again after filling.
-8. Change assessment answers, submit and open a fresh draft. Confirm new answers appear.
-   Recheck Recommendations PDF, Contact Card, Exercise and Your First Steps.
+2. Complete the last review date and necessary contact names/phone numbers. The call
+   order should be main contact, backup if unavailable, then IT help. Confirm whether
+   anyone else coordinates the incident; do not add another copy of the same contact.
+3. Choose Print / Save as PDF. Check US Letter and A4 at 100% with browser headers and
+   footers disabled. Confirm 1–2 readable pages, no overlaps, clipped fields or blank sheets.
+4. Confirm every filled contact value appears in the saved PDF. Verify the four-question
+   reporting list, shared-equipment caution, short management note and technical recovery
+   responsibility. No C. Leadership decides, policy fields, CISA or FBI entries should appear.
+5. Test external IT, no IT support, no alternate contact, absent backups and untested backups.
+   No-IT plans should ask management to arrange a trusted technology professional; absent
+   or untested backups must not appear ready to use. Financial Systems should read naturally.
+6. Resubmit changed answers and open a fresh plan. Check the new organization and answers.
+7. Recheck Recommendations PDF, Contact Card, Exercise and Your First Steps.
 
 Limits and future expansion
 ---------------------------
 
-Edits remain in the open resource tab and are not saved to the assessment or a server.
-Fill and verify phone numbers, coordinator/manager authority, backup contact, any
-external provider, insurance details, procedure locations and unknown system/backup
-information before relying on the draft. No coverage, role or approval is assumed.
-Manual Safari and physical printing need a Mac/iOS device and printer; automated
-Chromium exports do not establish Safari print-dialog behavior.
+Field edits remain in the open tab and are not saved to the assessment or a server.
+Verify contacts and phone numbers before use. Shared equipment must not be disconnected
+or shut down without help. Management remains responsible for deciding whether insurer,
+legal or authority advice is needed. Removing the long employee-facing reporting section
+does not remove those responsibilities. Long entries may wrap, so review the preview
+again after editing. Native Safari printing requires manual checking on a Mac/iOS device.
 
 The resource key and openPreparednessResource print flow are unchanged. renderIncidentPlan
 uses the submitted answers and existing contact/field helpers. The dormant full plan
